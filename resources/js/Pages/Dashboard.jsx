@@ -1,7 +1,7 @@
 import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 
-const Dashboard = ({ auth, profileCompleted }) => {
+const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
     const { user } = auth;
 
     return (
@@ -171,26 +171,49 @@ const Dashboard = ({ auth, profileCompleted }) => {
                                     <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                                         Recommended Simulations
                                     </h3>
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        {/* Placeholder Project Cards */}
-                                        <div className="border border-gray-200 rounded-lg p-4 hover:border-indigo-500 cursor-pointer transition-colors group">
-                                            <div className="h-32 bg-gray-100 rounded-md mb-3 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 transition-colors">
-                                                <svg className="w-8 h-8 text-gray-300 group-hover:text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                                </svg>
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                        {recommendedProjects.length > 0 ? (
+                                            recommendedProjects.map((project) => (
+                                                <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:border-indigo-500 cursor-pointer transition-colors group flex flex-col h-full">
+                                                    <div className="h-32 bg-gray-100 rounded-md mb-3 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 transition-colors shrink-0">
+                                                        <svg className="w-8 h-8 text-gray-300 group-hover:text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                                        </svg>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <h4 className="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1" title={project.title}>{project.title}</h4>
+                                                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                                                project.difficulty_level === 'Beginner' ? 'bg-green-100 text-green-800' :
+                                                                project.difficulty_level === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                                                                'bg-red-100 text-red-800'
+                                                            }`}>
+                                                                {project.difficulty_level}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-500 mb-3 line-clamp-2" title={project.description}>{project.description}</p>
+                                                        <div className="flex flex-wrap gap-1 mb-3">
+                                                            {project.skills.slice(0, 3).map((skill, index) => (
+                                                                <span key={index} className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                                                                    {skill}
+                                                                </span>
+                                                            ))}
+                                                            {project.skills.length > 3 && (
+                                                                <span className="text-xs text-gray-400 px-1.5 py-0.5">+{project.skills.length - 3}</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                                                        <span>{project.tasks_count} Tasks</span>
+                                                        <span className="group-hover:text-indigo-600 font-medium">Start Project &rarr;</span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="col-span-full text-center py-8 text-gray-500">
+                                                No projects found matching your skills yet.
                                             </div>
-                                            <h4 className="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">E-commerce API Integration</h4>
-                                            <p className="text-sm text-gray-500 mt-1">Backend • Laravel</p>
-                                        </div>
-                                        <div className="border border-gray-200 rounded-lg p-4 hover:border-indigo-500 cursor-pointer transition-colors group">
-                                            <div className="h-32 bg-gray-100 rounded-md mb-3 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 transition-colors">
-                                                <svg className="w-8 h-8 text-gray-300 group-hover:text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                                </svg>
-                                            </div>
-                                            <h4 className="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">Real-time Chat Application</h4>
-                                            <p className="text-sm text-gray-500 mt-1">Full Stack • React & Laravel</p>
-                                        </div>
+                                        )}
                                     </div>
                                     <div className="mt-5">
                                         <button className="text-indigo-600 font-medium hover:text-indigo-500 flex items-center">

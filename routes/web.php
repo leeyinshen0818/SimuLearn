@@ -34,8 +34,28 @@ Route::get('/dashboard', function () {
     $hasSkills = $user->skills()->exists();
     $hasBio = !empty($user->bio);
 
+    $recommendedProjects = [];
+    if ($hasSkills) {
+        // Get projects that match user skills
+        // For now, just get all projects with their skills and tasks count
+        $recommendedProjects = \App\Models\Project::with(['skills', 'tasks'])
+            ->take(6)
+            ->get()
+            ->map(function ($project) {
+                return [
+                    'id' => $project->id,
+                    'title' => $project->title,
+                    'description' => $project->description,
+                    'difficulty_level' => ucfirst($project->difficulty_level),
+                    'skills' => $project->skills->pluck('name'),
+                    'tasks_count' => $project->tasks->count(),
+                ];
+            });
+    }
+
     return Inertia::render('Dashboard', [
-        'profileCompleted' => $hasSkills || $hasBio
+        'profileCompleted' => $hasSkills || $hasBio,
+        'recommendedProjects' => $recommendedProjects
     ]);
 })->middleware('auth')->name('dashboard');
 
