@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'bio',
+        'bio_summary',
     ];
 
     public function projects()
@@ -31,6 +33,11 @@ class User extends Authenticatable
     public function tasks()
     {
         return $this->hasMany(UserTask::class);
+    }
+
+    public function skills()
+    {
+        return $this->belongsToMany(Skill::class)->withTimestamps();
     }
 
     /**

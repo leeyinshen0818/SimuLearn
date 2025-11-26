@@ -4,13 +4,13 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 ## 🚧 Project Status: Under Development
 
-**Overall Progress:** 20%
-![Progress](https://geps.dev/progress/20)
+**Overall Progress:** 25%
+![Progress](https://geps.dev/progress/25)
 
 | Phase       | Stage                            | Status       |
 | :---------- | :------------------------------- | :----------- |
 | **Phase 0** | Setup & Landing Page             | ✅ Completed |
-| **Phase 1** | User Foundation (Authentication) | 🔜 Next Up   |
+| **Phase 1** | User Foundation (Authentication) | ✅ Completed |
 | **Phase 2** | Data & Matching                  | ⏳ Pending   |
 | **Phase 3** | The Simulation Core              | ⏳ Pending   |
 | **Phase 4** | Evaluation Loop                  | ⏳ Pending   |

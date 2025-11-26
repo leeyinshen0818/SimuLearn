@@ -25,4 +25,9 @@ class Project extends Model
     {
         return $this->hasMany(UserProject::class);
     }
+
+    public function skills()
+    {
+        return $this->belongsToMany(Skill::class)->withPivot('required_proficiency')->withTimestamps();
+    }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
-const LandingPage = () => {
+const LandingPage = ({ auth }) => {
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
             <Head title="Welcome" />
@@ -17,18 +17,26 @@ const LandingPage = () => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">
+                                <span className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-violet-600">
                                     SimuLearn
                                 </span>
                             </div>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <button className="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                                Login
-                            </button>
-                            <button className="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all hover:scale-105">
-                                Get Started
-                            </button>
+                            {auth?.user ? (
+                                <Link href="/dashboard" className="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all hover:scale-105">
+                                    Dashboard
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link href="/login" className="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                                        Login
+                                    </Link>
+                                    <Link href="/register" className="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all hover:scale-105">
+                                        Get Started
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -37,7 +45,7 @@ const LandingPage = () => {
             {/* Hero Section */}
             <div className="relative pt-16 pb-16 lg:pb-24 overflow-hidden">
                 <div className="absolute inset-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-violet-50 opacity-90"></div>
+                    <div className="absolute inset-0 bg-linear-to-br from-indigo-50 via-white to-violet-50 opacity-90"></div>
                     <div className="absolute right-0 top-0 -mt-20 -mr-20 w-96 h-96 bg-indigo-100 rounded-full blur-3xl opacity-50"></div>
                     <div className="absolute left-0 bottom-0 -mb-20 -ml-20 w-96 h-96 bg-violet-100 rounded-full blur-3xl opacity-50"></div>
                 </div>
@@ -51,7 +59,7 @@ const LandingPage = () => {
                             </div>
                             <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl">
                                 <span className="block">Bridge the gap between</span>
-                                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
+                                <span className="block text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600">
                                     Theory & Industry
                                 </span>
                             </h1>
@@ -77,7 +85,7 @@ const LandingPage = () => {
                         </div>
                         <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
                             <div className="relative mx-auto w-full rounded-2xl shadow-2xl lg:max-w-md overflow-hidden group">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600 to-violet-600 opacity-10 group-hover:opacity-20 transition-opacity"></div>
+                                <div className="absolute inset-0 bg-linear-to-tr from-indigo-600 to-violet-600 opacity-10 group-hover:opacity-20 transition-opacity"></div>
                                 <div className="relative bg-white p-6 h-96 flex flex-col">
                                     {/* Mock UI for Simulation */}
                                     <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
@@ -91,7 +99,7 @@ const LandingPage = () => {
 
                                     <div className="space-y-4 flex-1">
                                         <div className="flex items-start gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
                                                 <span className="text-xs font-bold text-indigo-600">AI</span>
                                             </div>
                                             <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 w-full">
