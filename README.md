@@ -4,16 +4,48 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 ## 🚧 Project Status: Under Development
 
-**Overall Progress:** 25%
-![Progress](https://geps.dev/progress/25)
+**Overall Progress:** 35%
+![Progress](https://geps.dev/progress/35)
 
-| Phase       | Stage                            | Status       |
-| :---------- | :------------------------------- | :----------- |
-| **Phase 0** | Setup & Landing Page             | ✅ Completed |
-| **Phase 1** | User Foundation (Authentication) | ✅ Completed |
-| **Phase 2** | Data & Matching                  | ⏳ Pending   |
-| **Phase 3** | The Simulation Core              | ⏳ Pending   |
-| **Phase 4** | Evaluation Loop                  | ⏳ Pending   |
+### 📅 Detailed Roadmap
+
+#### **Phase 0: Foundation & Setup** (✅ Completed)
+
+-   [x] **Project Initialization**: Laravel 10 + React/Inertia setup.
+-   [x] **Database Architecture**: Initial schema design for Users, Skills, and Projects.
+-   [x] **Landing Page**: Responsive design with "Get Started" call-to-action.
+-   [x] **Environment Configuration**: CI/CD basics and local dev environment setup.
+
+#### **Phase 1: User Onboarding & Profiling** (✅ Completed)
+
+-   [x] **Authentication System**: Secure Login/Register flow (Laravel Breeze/Sanctum).
+-   [x] **Skill Profiling Wizard**: Multi-step form to capture user tech stack.
+-   [x] **AI Bio Summarization**: Integration with Google Gemini to generate professional summaries.
+-   [x] **User Dashboard**: Personalized dashboard with stats and profile management.
+
+#### **Phase 2: Data Intelligence & Matching** (🚧 In Progress)
+
+-   [x] **Project Database**: Seeding 10+ comprehensive simulation projects (E-commerce, Chat App, etc.).
+-   [x] **Matching Algorithm**: Logic to recommend projects based on user skill overlap.
+-   [x] **Dashboard Recommendations**: Dynamic UI to display matched simulations.
+-   [ ] **Project Details View**: Detailed breakdown of project scope, difficulty, and tech stack.
+-   [ ] **Skill Gap Analysis**: Visualizing what skills a user lacks for a specific project.
+
+#### **Phase 3: The Simulation Core** (⏳ Pending)
+
+-   [ ] **Workspace Interface**: The main "IDE-like" view for working on projects.
+-   [ ] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies.
+-   [ ] **Task Detail View**: Markdown-rendered instructions, resources, and acceptance criteria.
+-   [ ] **Submission System**: File upload or text input for task deliverables.
+-   [ ] **Progress Tracking**: State management for locked/unlocked/completed tasks.
+
+#### **Phase 4: Evaluation & Feedback Loop** (⏳ Pending)
+
+-   [ ] **AI Code Reviewer**: Automated analysis of user submissions using LLMs.
+-   [ ] **Feedback Engine**: Generating constructive, specific feedback for improvements.
+-   [ ] **Scoring System**: XP/Points calculation based on code quality and efficiency.
+-   [ ] **Gamification**: Badges and achievements for milestones.
+-   [ ] **Career Analytics**: Charts showing skill growth over time.
 
 ## 🚀 Core Philosophy
 
