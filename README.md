@@ -2,6 +2,30 @@
 
 SimuLearn is an intelligent, personalized learning platform designed to bridge the gap between academic theory and industry application. It functions as a **Virtual Industry Simulator**, using AI to act as a "Senior Project Manager" that guides students through realistic software development lifecycles.
 
+## 🚧 Development Status
+
+**Current Status: Work in Progress (approx. 10% Complete)**
+
+The system is currently under active development. Below is the roadmap and progress tracking:
+
+-   ✅ **Phase 0: Foundation & UI (100%)**
+    -   Project Setup (Laravel + React + Inertia)
+    -   Database Schema Design
+    -   Landing Page Implementation
+-   ⬜ **Phase 1: User Foundation (0%)**
+    -   Authentication (Login/Register)
+    -   User Dashboard Shell
+-   ⬜ **Phase 2: Data & Matching (0%)**
+    -   Skill Input Interface
+    -   Project Database Seeding
+    -   Matching Algorithm
+-   ⬜ **Phase 3: Simulation Core (0%)**
+    -   Interactive Task Graph (React Flow)
+    -   Dependency Management Logic
+-   ⬜ **Phase 4: AI Evaluation (0%)**
+    -   Code Submission Interface
+    -   AI Grading & Feedback Integration
+
 ## 🚀 Core Philosophy
 
 Unlike traditional e-learning platforms that deliver static content, SimuLearn delivers **experience**. It operates on the logic that students learn best when placed in a simulated work environment where tasks are unlocked based on competency, simulating the workflow of a Junior Developer working under a Technical Lead.
