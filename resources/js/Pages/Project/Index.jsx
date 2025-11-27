@@ -4,15 +4,6 @@ import { Head, Link } from '@inertiajs/react';
 const ProjectIndex = ({ auth, projects, userSkills = [] }) => {
     const [filter, setFilter] = useState('all'); // 'all', 'recommended', 'beginner', 'intermediate', 'advanced'
 
-    const filteredProjects = projects.filter(project => {
-        if (filter === 'all') return true;
-        if (filter === 'recommended') {
-            if (!project.skills || project.skills.length === 0) return true;
-            return project.skills.some(skill => userSkills.includes(skill.id));
-        }
-        return project.difficulty_level === filter;
-    });
-
     // Helper to calculate match percentage
     const getMatchPercentage = (project) => {
         const totalSkills = project.skills ? project.skills.length : 0;
@@ -21,7 +12,32 @@ const ProjectIndex = ({ auth, projects, userSkills = [] }) => {
         return Math.round((matchingSkills / totalSkills) * 100);
     };
 
-    // Split projects for 'all' view
+    let filteredProjects = projects.filter(project => {
+        if (filter === 'all') return true;
+        if (filter === 'recommended') {
+            // Show projects with at least some match
+            return getMatchPercentage(project) > 0;
+        }
+        return project.difficulty_level === filter;
+    });
+
+    // Sorting Logic
+    filteredProjects.sort((a, b) => {
+        if (filter === 'all') {
+            // Sort by difficulty: Beginner -> Intermediate -> Advanced
+            const difficultyOrder = { 'beginner': 1, 'intermediate': 2, 'advanced': 3 };
+            const diffA = difficultyOrder[a.difficulty_level] || 4;
+            const diffB = difficultyOrder[b.difficulty_level] || 4;
+            return diffA - diffB;
+        }
+        if (filter === 'recommended') {
+            // Sort by match percentage: High -> Low
+            return getMatchPercentage(b) - getMatchPercentage(a);
+        }
+        return 0;
+    });
+
+    // Split projects for 'all' view to highlight perfect matches
     const recommendedProjects = filter === 'all'
         ? filteredProjects.filter(p => getMatchPercentage(p) === 100)
         : [];

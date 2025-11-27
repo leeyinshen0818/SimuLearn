@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 
 const ProjectShow = ({ auth, project, userSkills = [] }) => {
     const [expandedTask, setExpandedTask] = useState(null);
+    const [warningModal, setWarningModal] = useState({ isOpen: false, task: null, missingSkills: [] });
 
     const isTaskLocked = (task) => {
         if (!task.skills || task.skills.length === 0) return false;
@@ -22,9 +23,79 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
         }
     };
 
+    const handleTaskClick = (task) => {
+        const locked = isTaskLocked(task);
+        if (locked && expandedTask !== task.id) {
+            const missing = getMissingSkills(task);
+            setWarningModal({ isOpen: true, task: task, missingSkills: missing });
+        }
+        toggleTask(task.id);
+    };
+
+    const closeWarningModal = () => {
+        setWarningModal({ ...warningModal, isOpen: false });
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             <Head title={project.title} />
+
+            {/* Warning Modal */}
+            {warningModal.isOpen && (
+                <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        {/* Background overlay */}
+                        <div className="fixed inset-0 transition-opacity" aria-hidden="true" onClick={closeWarningModal}></div>
+
+                        {/* This element is to trick the browser into centering the modal contents. */}
+                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                        <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="sm:flex sm:items-start">
+                                    <div className="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                                        <svg className="h-6 w-6 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                            Skill Gap Detected
+                                        </h3>
+                                        <div className="mt-2">
+                                            <p className="text-sm text-gray-500">
+                                                You are attempting <strong>{warningModal.task?.title}</strong>, but you are missing some recommended skills.
+                                            </p>
+                                            <div className="mt-4 bg-yellow-50 p-3 rounded-md border border-yellow-100">
+                                                <h4 className="text-xs font-semibold text-yellow-800 uppercase tracking-wider mb-2">Missing Skills</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {warningModal.missingSkills.map(skill => (
+                                                        <span key={skill.id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-yellow-800 border border-yellow-200">
+                                                            {skill.name}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <p className="mt-4 text-sm text-gray-500">
+                                                Proceeding without these skills might be challenging. We recommend reviewing these topics, but you are free to learn by doing!
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button
+                                    type="button"
+                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                    onClick={closeWarningModal}
+                                >
+                                    I Understand, Proceed
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Navigation (Simplified for now) */}
             <nav className="bg-white border-b border-gray-200">
@@ -85,13 +156,13 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                                 const isExpanded = expandedTask === task.id;
 
                                                 return (
-                                                    <li key={task.id} className={`pl-3 pr-4 py-4 flex flex-col text-sm ${locked ? 'bg-gray-50 opacity-75' : 'hover:bg-gray-50 cursor-pointer'}`} onClick={() => !locked && toggleTask(task.id)}>
+                                                    <li key={task.id} className={`pl-3 pr-4 py-4 flex flex-col text-sm hover:bg-gray-50 cursor-pointer`} onClick={() => handleTaskClick(task)}>
                                                         <div className="flex items-start justify-between w-full">
                                                             <div className="w-0 flex-1 flex items-start">
                                                                 <div className="mt-1 mr-3 shrink-0">
                                                                     {locked ? (
-                                                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                                        <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                                         </svg>
                                                                     ) : (
                                                                         <svg className={`w-5 h-5 text-green-500 transition-transform ${isExpanded ? 'transform rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,10 +171,10 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                                                     )}
                                                                 </div>
                                                                 <div className="flex flex-col flex-1">
-                                                                    <span className={`text-base font-medium ${locked ? 'text-gray-500' : 'text-gray-900'}`}>
+                                                                    <span className={`text-base font-medium text-gray-900`}>
                                                                         {task.title}
                                                                     </span>
-                                                                    <p className={`mt-1 text-sm ${locked ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                    <p className={`mt-1 text-sm text-gray-500`}>
                                                                         {task.description}
                                                                     </p>
 
@@ -116,14 +187,14 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                                                                     key={skill.id}
                                                                                     className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border
                                                                                         ${locked
-                                                                                            ? (hasSkill ? 'bg-gray-100 text-gray-500 border-gray-200' : 'bg-red-50 text-red-600 border-red-200')
+                                                                                            ? (hasSkill ? 'bg-gray-100 text-gray-500 border-gray-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200')
                                                                                             : 'bg-green-50 text-green-700 border-green-200'
                                                                                         }`}
                                                                                 >
                                                                                     {skill.name}
                                                                                     {!hasSkill && locked && (
                                                                                         <svg className="ml-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                                                                         </svg>
                                                                                     )}
                                                                                     {hasSkill && (
@@ -137,24 +208,24 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                                                     </div>
 
                                                                     {locked && (
-                                                                        <div className="mt-2 flex items-center text-xs text-red-500 font-medium">
+                                                                        <div className="mt-2 flex items-center text-xs text-yellow-600 font-medium">
                                                                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                                                             </svg>
-                                                                            Task Locked: Missing required skills.
+                                                                            Missing recommended skills, but you can still try!
                                                                         </div>
                                                                     )}
                                                                 </div>
                                                             </div>
                                                             <div className="ml-4 shrink-0 self-start mt-1">
-                                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${locked ? 'bg-gray-100 text-gray-500' : 'bg-indigo-100 text-indigo-800'}`}>
+                                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${locked ? 'bg-yellow-100 text-yellow-800' : 'bg-indigo-100 text-indigo-800'}`}>
                                                                     {task.category}
                                                                 </span>
                                                             </div>
                                                         </div>
 
                                                         {/* Expanded Details */}
-                                                        {isExpanded && !locked && (
+                                                        {isExpanded && (
                                                             <div className="mt-4 ml-8 p-4 bg-indigo-50 rounded-md border border-indigo-100">
                                                                 <h4 className="text-sm font-semibold text-indigo-900 mb-2">Expected Outcome</h4>
                                                                 <p className="text-sm text-indigo-800">
