@@ -149,99 +149,129 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                 <div className="sm:col-span-2">
                                     <dt className="text-sm font-medium text-gray-500">Project Roadmap</dt>
                                     <dd className="mt-1 text-sm text-gray-900">
-                                        <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
-                                            {project.tasks.map((task) => {
-                                                const locked = isTaskLocked(task);
-                                                const missingSkills = locked ? getMissingSkills(task) : [];
-                                                const isExpanded = expandedTask === task.id;
+                                        <div className="border border-gray-200 rounded-md overflow-hidden">
+                                            <table className="min-w-full divide-y divide-gray-200">
+                                                <thead className="bg-gray-50">
+                                                    <tr>
+                                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            Task
+                                                        </th>
+                                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            Recommended Skills
+                                                        </th>
+                                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                            Status
+                                                        </th>
+                                                        <th scope="col" className="relative px-6 py-3">
+                                                            <span className="sr-only">Details</span>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="bg-white divide-y divide-gray-200">
+                                                    {project.tasks.map((task, index) => {
+                                                        const locked = isTaskLocked(task);
+                                                        const missingSkills = locked ? getMissingSkills(task) : [];
+                                                        const isExpanded = expandedTask === task.id;
 
-                                                return (
-                                                    <li key={task.id} className={`pl-3 pr-4 py-4 flex flex-col text-sm hover:bg-gray-50 cursor-pointer`} onClick={() => handleTaskClick(task)}>
-                                                        <div className="flex items-start justify-between w-full">
-                                                            <div className="w-0 flex-1 flex items-start">
-                                                                <div className="mt-1 mr-3 shrink-0">
-                                                                    {locked ? (
-                                                                        <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                                        </svg>
-                                                                    ) : (
-                                                                        <svg className={`w-5 h-5 text-green-500 transition-transform ${isExpanded ? 'transform rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                        </svg>
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex flex-col flex-1">
-                                                                    <span className={`text-base font-medium text-gray-900`}>
-                                                                        {task.title}
-                                                                    </span>
-                                                                    <p className={`mt-1 text-sm text-gray-500`}>
-                                                                        {task.description}
-                                                                    </p>
-
-                                                                    {/* Skills Display */}
-                                                                    <div className="mt-2 flex flex-wrap gap-2">
-                                                                        {task.skills && task.skills.map(skill => {
-                                                                            const hasSkill = userSkills.includes(skill.id);
-                                                                            return (
-                                                                                <span
-                                                                                    key={skill.id}
-                                                                                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border
-                                                                                        ${locked
-                                                                                            ? (hasSkill ? 'bg-gray-100 text-gray-500 border-gray-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200')
-                                                                                            : 'bg-green-50 text-green-700 border-green-200'
-                                                                                        }`}
-                                                                                >
-                                                                                    {skill.name}
-                                                                                    {!hasSkill && locked && (
-                                                                                        <svg className="ml-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                                                                        </svg>
-                                                                                    )}
-                                                                                    {hasSkill && (
-                                                                                        <svg className="ml-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                                                        </svg>
-                                                                                    )}
-                                                                                </span>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-
-                                                                    {locked && (
-                                                                        <div className="mt-2 flex items-center text-xs text-yellow-600 font-medium">
-                                                                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                                                            </svg>
-                                                                            Missing recommended skills. You may use any tech stack to achieve the expected outcome.
+                                                        return (
+                                                            <React.Fragment key={task.id}>
+                                                                <tr
+                                                                    className={`hover:bg-gray-50 cursor-pointer transition-colors duration-150 ${isExpanded ? 'bg-gray-50' : ''}`}
+                                                                    onClick={() => handleTaskClick(task)}
+                                                                >
+                                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                                        <div className="flex items-center">
+                                                                            <div className="shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 font-bold text-sm">
+                                                                                {index + 1}
+                                                                            </div>
+                                                                            <div className="ml-4">
+                                                                                <div className="text-sm font-medium text-gray-900">{task.title}</div>
+                                                                                <div className="text-sm text-gray-500">{task.category}</div>
+                                                                            </div>
                                                                         </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <div className="ml-4 shrink-0 self-start mt-1">
-                                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${locked ? 'bg-yellow-100 text-yellow-800' : 'bg-indigo-100 text-indigo-800'}`}>
-                                                                    {task.category}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Expanded Details */}
-                                                        {isExpanded && (
-                                                            <div className="mt-4 ml-8 p-4 bg-indigo-50 rounded-md border border-indigo-100">
-                                                                <h4 className="text-sm font-semibold text-indigo-900 mb-2">Expected Outcome</h4>
-                                                                <p className="text-sm text-indigo-800">
-                                                                    {task.expected_outcome || "No specific outcome defined yet."}
-                                                                </p>
-                                                                <div className="mt-3 pt-3 border-t border-indigo-200">
-                                                                    <p className="text-xs text-indigo-600">
-                                                                        <span className="font-semibold">Recommended Stack:</span> {task.skills.map(s => s.name).join(', ')}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
+                                                                    </td>
+                                                                    <td className="px-6 py-4">
+                                                                        <div className="text-sm text-gray-900">
+                                                                            {task.skills && task.skills.length > 0 ? (
+                                                                                <span className="text-gray-600">
+                                                                                    {task.skills.map(s => s.name).join(', ')}
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className="text-gray-400 italic">None specified</span>
+                                                                            )}
+                                                                        </div>
+                                                                        {locked && (
+                                                                            <div className="text-xs text-red-500 mt-1">
+                                                                                Missing: {missingSkills.map(s => s.name).join(', ')}
+                                                                            </div>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                                        {locked ? (
+                                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                                <svg className="-ml-0.5 mr-1.5 h-2 w-2 text-yellow-400" fill="currentColor" viewBox="0 0 8 8">
+                                                                                    <circle cx="4" cy="4" r="3" />
+                                                                                </svg>
+                                                                                Missing Skills
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                                <svg className="-ml-0.5 mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8">
+                                                                                    <circle cx="4" cy="4" r="3" />
+                                                                                </svg>
+                                                                                Ready
+                                                                            </span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                                        <span className="text-indigo-600 hover:text-indigo-900">
+                                                                            {isExpanded ? 'Hide' : 'Details'}
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                                {isExpanded && (
+                                                                    <tr>
+                                                                        <td colSpan="4" className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                                                                            <div className="text-sm text-gray-700 space-y-4">
+                                                                                <div>
+                                                                                    <h4 className="font-semibold text-gray-900">Description</h4>
+                                                                                    {task.scenario && (
+                                                                                        <p className="mb-3 italic text-gray-600">
+                                                                                            {task.scenario}
+                                                                                        </p>
+                                                                                    )}
+                                                                                    <p className="mt-1">{task.description}</p>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <h4 className="font-semibold text-gray-900">Expected Outcome</h4>
+                                                                                    <p className="mt-1">{task.expected_outcome || "No specific outcome defined yet."}</p>
+                                                                                </div>
+                                                                                {locked && (
+                                                                                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-2">
+                                                                                        <div className="flex">
+                                                                                            <div className="shrink-0">
+                                                                                                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                                                                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                                                                </svg>
+                                                                                            </div>
+                                                                                            <div className="ml-3">
+                                                                                                <p className="text-sm text-yellow-700">
+                                                                                                    Missing recommended skills. You may use any tech stack to achieve the expected outcome.
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </React.Fragment>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </dd>
                                 </div>
                             </dl>
