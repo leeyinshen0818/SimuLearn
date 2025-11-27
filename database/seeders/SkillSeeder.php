@@ -51,6 +51,11 @@ class SkillSeeder extends Seeder
             ['name' => 'Ruby', 'category' => 'Backend'],
             ['name' => 'Ruby on Rails', 'category' => 'Backend'],
             ['name' => 'Rust', 'category' => 'Backend'],
+            ['name' => 'REST', 'category' => 'Backend'],
+            ['name' => 'gRPC', 'category' => 'Backend'],
+            ['name' => 'GraphQL', 'category' => 'Backend'],
+            ['name' => 'Microservices', 'category' => 'Backend'],
+            ['name' => 'Event-Driven Architecture', 'category' => 'Backend'],
 
             // Database
             ['name' => 'MySQL', 'category' => 'Database'],
@@ -77,6 +82,8 @@ class SkillSeeder extends Seeder
             ['name' => 'GitHub Actions', 'category' => 'DevOps'],
             ['name' => 'Terraform', 'category' => 'DevOps'],
             ['name' => 'Nginx', 'category' => 'DevOps'],
+            ['name' => 'Kafka', 'category' => 'DevOps'],
+            ['name' => 'RabbitMQ', 'category' => 'DevOps'],
 
             // Mobile
             ['name' => 'React Native', 'category' => 'Mobile'],
@@ -95,6 +102,10 @@ class SkillSeeder extends Seeder
             ['name' => 'NumPy', 'category' => 'AI/Data'],
             ['name' => 'Scikit-learn', 'category' => 'AI/Data'],
             ['name' => 'OpenCV', 'category' => 'AI/Data'],
+
+            // Security
+            ['name' => 'OAuth2', 'category' => 'Security'],
+            ['name' => 'JWT', 'category' => 'Security'],
         ];
 
         foreach ($skills as $skill) {

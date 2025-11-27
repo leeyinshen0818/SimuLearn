@@ -4,8 +4,8 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 ## 🚧 Project Status: Under Development
 
-**Overall Progress:** 35%
-![Progress](https://geps.dev/progress/35)
+**Overall Progress:** 45%
+![Progress](https://geps.dev/progress/45)
 
 ### 📅 Detailed Roadmap
 
@@ -23,15 +23,15 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 -   [x] **AI Bio Summarization**: Integration with Google Gemini to generate professional summaries.
 -   [x] **User Dashboard**: Personalized dashboard with stats and profile management.
 
-#### **Phase 2: Data Intelligence & Matching** (🚧 In Progress)
+#### **Phase 2: Data Intelligence & Matching** (✅ Completed)
 
--   [x] **Project Database**: Seeding 10+ comprehensive simulation projects (E-commerce, Chat App, etc.).
--   [x] **Matching Algorithm**: Logic to recommend projects based on user skill overlap.
--   [x] **Dashboard Recommendations**: Dynamic UI to display matched simulations.
--   [ ] **Project Details View**: Detailed breakdown of project scope, difficulty, and tech stack.
--   [ ] **Skill Gap Analysis**: Visualizing what skills a user lacks for a specific project.
+-   [x] **Project Database**: Seeding 24 comprehensive simulation projects across 3 difficulty tiers.
+-   [x] **Granular Task Structure**: Projects now feature tiered task lists (Beginner: 6+, Intermediate: 12+, Advanced: 18+) to guide users from setup to mastery.
+-   [x] **Matching Algorithm**: Logic to recommend projects based on user skill overlap and difficulty preference.
+-   [x] **Dashboard Recommendations**: Dynamic UI to display "Best Match" simulations.
+-   [x] **Project Filtering**: Filter projects by difficulty (Beginner, Intermediate, Advanced).
 
-#### **Phase 3: The Simulation Core** (⏳ Pending)
+#### **Phase 3: The Simulation Core** (🚧 In Progress)
 
 -   [ ] **Workspace Interface**: The main "IDE-like" view for working on projects.
 -   [ ] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies.

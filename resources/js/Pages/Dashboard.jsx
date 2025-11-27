@@ -93,9 +93,9 @@ const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
                                         Your profile is set up and looking great. You're all set to start your first simulation project and apply your skills.
                                     </p>
                                 </div>
-                                <button className="px-6 py-3 bg-white text-indigo-600 rounded-lg font-bold hover:bg-indigo-50 transition-colors shadow-sm">
+                                <Link href="/projects" className="px-6 py-3 bg-white text-indigo-600 rounded-lg font-bold hover:bg-indigo-50 transition-colors shadow-sm">
                                     Start New Project
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     )}
@@ -174,7 +174,7 @@ const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
                                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                         {recommendedProjects.length > 0 ? (
                                             recommendedProjects.map((project) => (
-                                                <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:border-indigo-500 cursor-pointer transition-colors group flex flex-col h-full">
+                                                <Link href={`/project/${project.id}`} key={project.id} className="border border-gray-200 rounded-lg p-4 hover:border-indigo-500 cursor-pointer transition-colors group flex flex-col h-full">
                                                     <div className="h-32 bg-gray-100 rounded-md mb-3 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 transition-colors shrink-0">
                                                         <svg className="w-8 h-8 text-gray-300 group-hover:text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -207,7 +207,7 @@ const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
                                                         <span>{project.tasks_count} Tasks</span>
                                                         <span className="group-hover:text-indigo-600 font-medium">Start Project &rarr;</span>
                                                     </div>
-                                                </div>
+                                                </Link>
                                             ))
                                         ) : (
                                             <div className="col-span-full text-center py-8 text-gray-500">
@@ -216,12 +216,12 @@ const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
                                         )}
                                     </div>
                                     <div className="mt-5">
-                                        <button className="text-indigo-600 font-medium hover:text-indigo-500 flex items-center">
+                                        <Link href="/projects" className="text-indigo-600 font-medium hover:text-indigo-500 flex items-center">
                                             View all projects
                                             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                             </svg>
-                                        </button>
+                                        </Link>
                                     </div>
                                 </div>
                             ) : (

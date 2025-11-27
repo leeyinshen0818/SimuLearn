@@ -27,6 +27,7 @@ Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/register', [AuthController::class, 'signup']);
 
 use App\Http\Controllers\SkillController;
+use App\Http\Controllers\ProjectController;
 
 Route::get('/dashboard', function () {
     /** @var \App\Models\User $user */
@@ -36,12 +37,15 @@ Route::get('/dashboard', function () {
 
     $recommendedProjects = [];
     if ($hasSkills) {
-        // Get projects that match user skills
-        // For now, just get all projects with their skills and tasks count
+        $userSkillIds = $user->skills()->pluck('skills.id')->toArray();
+
         $recommendedProjects = \App\Models\Project::with(['skills', 'tasks'])
-            ->take(6)
             ->get()
-            ->map(function ($project) {
+            ->map(function ($project) use ($userSkillIds) {
+                $matchingSkillsCount = $project->skills->whereIn('id', $userSkillIds)->count();
+                $totalSkillsCount = $project->skills->count();
+                $matchPercentage = $totalSkillsCount > 0 ? ($matchingSkillsCount / $totalSkillsCount) * 100 : 0;
+
                 return [
                     'id' => $project->id,
                     'title' => $project->title,
@@ -49,8 +53,12 @@ Route::get('/dashboard', function () {
                     'difficulty_level' => ucfirst($project->difficulty_level),
                     'skills' => $project->skills->pluck('name'),
                     'tasks_count' => $project->tasks->count(),
+                    'match_percentage' => $matchPercentage,
                 ];
-            });
+            })
+            ->sortByDesc('match_percentage')
+            ->take(3)
+            ->values();
     }
 
     return Inertia::render('Dashboard', [
@@ -62,4 +70,6 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile/skills', [SkillController::class, 'create'])->name('profile.skills');
     Route::post('/profile/skills', [SkillController::class, 'store'])->name('profile.skills.store');
+    Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+Route::get('/project/{project}', [ProjectController::class, 'show'])->name('project.show');
 });

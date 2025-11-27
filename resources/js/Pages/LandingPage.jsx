@@ -59,7 +59,7 @@ const LandingPage = ({ auth }) => {
                             </div>
                             <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl">
                                 <span className="block">Bridge the gap between</span>
-                                <span className="block text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600">
+                                <span className="block text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 pb-2">
                                     Theory & Industry
                                 </span>
                             </h1>
