@@ -102,11 +102,11 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
-                            <Link href="/dashboard" className="flex items-center text-gray-500 hover:text-gray-700">
+                            <Link href="/projects" className="flex items-center text-gray-500 hover:text-gray-700">
                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
-                                Back to Dashboard
+                                Back to Library
                             </Link>
                         </div>
                     </div>
@@ -135,7 +135,7 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                     <dd className="mt-1 text-sm text-gray-900">{project.tasks.length} Tasks</dd>
                                 </div>
                                 <div className="sm:col-span-2">
-                                    <dt className="text-sm font-medium text-gray-500">Skills Required</dt>
+                                    <dt className="text-sm font-medium text-gray-500">Recommended Tech Stack</dt>
                                     <dd className="mt-1 text-sm text-gray-900">
                                         <div className="flex flex-wrap gap-2">
                                             {project.skills.map(skill => (
@@ -212,7 +212,7 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                                                             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                                                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                                                             </svg>
-                                                                            Missing recommended skills, but you can still try!
+                                                                            Missing recommended skills. You may use any tech stack to achieve the expected outcome.
                                                                         </div>
                                                                     )}
                                                                 </div>
