@@ -35,12 +35,12 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 #### **Phase 3: The Simulation Core** (🚧 In Progress)
 
--   [ ] **Workspace Interface**: The main "IDE-like" view for working on projects.
--   [ ] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies.
--   [ ] **Task Detail View**: Markdown-rendered instructions, resources, and acceptance criteria.
--   [ ] **Task Simulation**: Detailed instructions and scenario simulation (Pending).
+-   [x] **Workspace Interface**: The main "IDE-like" view for working on projects.
+-   [x] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies with auto-layout (Dagre).
+-   [x] **AI Recommended Path**: A linear, optimized sequence of tasks suggested by AI based on user skills.
+-   [x] **Task Detail View**: Interactive modal with scenario, expected outcomes, and skill requirements.
+-   [x] **Progress Tracking**: Visual state management for locked/unlocked/completed tasks across Graph, List, and Path views.
 -   [ ] **Task Submission**: File upload or text input for task deliverables (Pending).
--   [ ] **Progress Tracking**: State management for locked/unlocked/completed tasks.
 
 #### **Phase 4: Evaluation & Feedback Loop** (⏳ Pending)
 
@@ -66,7 +66,10 @@ Unlike traditional e-learning platforms that deliver static content, SimuLearn d
 
 -   **DAG Workflow:** Projects are structured as **Directed Acyclic Graphs**.
 -   **Dependency Management:** Future tasks are "locked" until prerequisites are met (e.g., you cannot "Build API" before "Design Database").
--   **Visual Interface:** An interactive node-based graph (powered by React Flow) visualizes the project roadmap.
+-   **Multi-View Interface:** Users can toggle between:
+    -   **Graph View:** An interactive node-based graph (React Flow) visualizing the full project roadmap.
+    -   **AI Path:** A linear, step-by-step recommended sequence optimized for the user.
+    -   **List View:** A traditional grouped list of all tasks.
 
 ### 3. AI Evaluation & Feedback (The Code Review)
 
