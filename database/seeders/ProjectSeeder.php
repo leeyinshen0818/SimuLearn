@@ -176,42 +176,48 @@ class ProjectSeeder extends Seeder
                         'description' => 'You are the lead frontend dev for a new startup "ChatGenius". Your first milestone is to get the React boilerplate up and running. You should initialize a new React application using Create React App or Vite. Then, set up the basic folder structure and install necessary dependencies like React Router for navigation and a CSS framework (e.g., Tailwind CSS or Material UI) for styling.',
                         'category' => 'Frontend',
                         'required_skills' => ['React', 'JavaScript'],
-                        'expected_outcome' => 'A React application should be running on http://localhost:3000 (or 5173 for Vite). The browser console should be free of errors. The main page should render a "Welcome to Chat" header styled with the chosen CSS framework.'
+                        'expected_outcome' => 'A React application should be running on http://localhost:3000 (or 5173 for Vite). The browser console should be free of errors. The main page should render a "Welcome to Chat" header styled with the chosen CSS framework.',
+                        'prerequisites' => []
                     ],
                     [
                         'title' => 'Static Chat UI',
                         'description' => 'Before we connect to the backend, we need a visual prototype. Build the chat UI so we can show it to investors. You should design and build the chat interface components: a Sidebar for channels/users, a Chat Window for the conversation, and a Message Input area. Use mock data to populate the interface. Ensure the layout is responsive and the message list scrolls correctly when new messages are added.',
                         'category' => 'Frontend',
                         'required_skills' => ['React', 'CSS'],
-                        'expected_outcome' => 'A responsive chat interface should be visible. The sidebar should list mock channels. The main area should display mock messages with distinct styles for sent (right-aligned) and received (left-aligned) messages. The message list should automatically scroll to the bottom.'
+                        'expected_outcome' => 'A responsive chat interface should be visible. The sidebar should list mock channels. The main area should display mock messages with distinct styles for sent (right-aligned) and received (left-aligned) messages. The message list should automatically scroll to the bottom.',
+                        'prerequisites' => ['Frontend Setup']
                     ],
                     [
                         'title' => 'Node.js API',
                         'description' => 'The backend team is swamped. You need to spin up a simple Node.js server to handle user authentication. You should create a basic backend API using Express.js or NestJS. Implement a POST `/login` endpoint that accepts a username and password, validates them, and returns a JWT token. Set up a simple in-memory array or a database (like MongoDB) to store user credentials.',
                         'category' => 'Backend',
                         'required_skills' => ['Node.js'],
-                        'expected_outcome' => 'A Node.js server should be running on port 5000. Sending a POST request to `http://localhost:5000/login` with valid JSON credentials should return a 200 OK response containing a JWT access token. Invalid credentials should return a 401 Unauthorized response.'
+                        'expected_outcome' => 'A Node.js server should be running on port 5000. Sending a POST request to `http://localhost:5000/login` with valid JSON credentials should return a 200 OK response containing a JWT access token. Invalid credentials should return a 401 Unauthorized response.',
+                        'prerequisites' => []
                     ],
                     [
                         'title' => 'User Presence',
                         'description' => 'Users want to know who is online. Implement a real-time presence feature using WebSockets. You should implement real-time user presence using Socket.io. When a user connects to the socket server, broadcast their "online" status to all other connected clients. Update the frontend UI to display a green dot next to the names of online users.',
                         'category' => 'Backend',
                         'required_skills' => ['Node.js', 'React'],
-                        'expected_outcome' => 'When a user opens the app in a second browser tab (simulating a second user), the first tab should immediately update to show the new user as "Online" with a visual indicator (e.g., green dot). Closing the second tab should trigger an "Offline" status update in the first tab.'
+                        'expected_outcome' => 'When a user opens the app in a second browser tab (simulating a second user), the first tab should immediately update to show the new user as "Online" with a visual indicator (e.g., green dot). Closing the second tab should trigger an "Offline" status update in the first tab.',
+                        'prerequisites' => ['Node.js API']
                     ],
                     [
                         'title' => 'Typing Indicators',
                         'description' => 'It\'s annoying not knowing if someone is replying. Add a typing indicator to improve the UX. You should add a "User is typing..." feature. Emit a socket event (e.g., `typing`) when the user types in the input box, and listen for this event on other clients to display a visual typing indicator.',
                         'category' => 'Frontend',
                         'required_skills' => ['React', 'Node.js'],
-                        'expected_outcome' => 'When a user starts typing in one client, other clients in the same chat should see a "User is typing..." message or animation. The indicator should disappear automatically after a short delay (e.g., 2-3 seconds) once the user stops typing.'
+                        'expected_outcome' => 'When a user starts typing in one client, other clients in the same chat should see a "User is typing..." message or animation. The indicator should disappear automatically after a short delay (e.g., 2-3 seconds) once the user stops typing.',
+                        'prerequisites' => ['Static Chat UI', 'User Presence']
                     ],
                     [
                         'title' => 'Message History Persistence',
                         'description' => 'Chats are disappearing when we refresh the page! Persist the messages to a MongoDB database. You should connect the backend to a MongoDB database. Create a Mongoose schema for Messages (including sender, content, timestamp) and save every new chat message to the database. Create an API endpoint to fetch the chat history when the application loads.',
                         'category' => 'Database',
                         'required_skills' => ['MongoDB', 'Node.js'],
-                        'expected_outcome' => 'Refreshing the browser page should retrieve and display previous messages from the MongoDB database. The messages must appear in the correct chronological order. Check the MongoDB collection to verify that new messages are being inserted as documents.'
+                        'expected_outcome' => 'Refreshing the browser page should retrieve and display previous messages from the MongoDB database. The messages must appear in the correct chronological order. Check the MongoDB collection to verify that new messages are being inserted as documents.',
+                        'prerequisites' => ['Node.js API']
                     ],
 
                     // Level 2: Intermediate Features
@@ -1305,6 +1311,7 @@ class ProjectSeeder extends Seeder
             }
 
             // Create Tasks
+            $createdTasks = [];
             foreach ($projectData['tasks'] as $taskData) {
                 $task = Task::create([
                     'project_id' => $project->id,
@@ -1313,6 +1320,8 @@ class ProjectSeeder extends Seeder
                     'category' => $taskData['category'],
                     'scenario' => $taskData['scenario'] ?? null, // Add scenario
                 ]);
+
+                $createdTasks[$taskData['title']] = $task;
 
                 // Attach Required Skills to Task
                 if (isset($taskData['required_skills'])) {
@@ -1327,6 +1336,18 @@ class ProjectSeeder extends Seeder
                 // Update Expected Outcome
                 if (isset($taskData['expected_outcome'])) {
                     $task->update(['expected_outcome' => $taskData['expected_outcome']]);
+                }
+            }
+
+            // Attach Prerequisites
+            foreach ($projectData['tasks'] as $taskData) {
+                if (isset($taskData['prerequisites'])) {
+                    $task = $createdTasks[$taskData['title']];
+                    foreach ($taskData['prerequisites'] as $prereqTitle) {
+                        if (isset($createdTasks[$prereqTitle])) {
+                            $task->prerequisites()->attach($createdTasks[$prereqTitle]->id);
+                        }
+                    }
                 }
             }
         }

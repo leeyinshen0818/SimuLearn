@@ -12,7 +12,10 @@ class ProjectController extends Controller
     public function index()
     {
         $projects = Project::with(['skills', 'tasks'])->get();
-        $userSkills = auth()->user() ? auth()->user()->skills()->pluck('skills.id')->toArray() : [];
+
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+        $userSkills = $user ? $user->skills()->pluck('skills.id')->toArray() : [];
 
         return Inertia::render('Project/Index', [
             'projects' => $projects,
@@ -22,9 +25,13 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        $project->load(['skills', 'tasks.skills']);
+        $project->load(['skills', 'tasks.skills', 'tasks.prerequisites', 'tasks.userTasks' => function ($query) {
+            $query->where('user_id', auth()->id());
+        }]);
 
-        $userSkills = auth()->user() ? auth()->user()->skills()->pluck('skills.id')->toArray() : [];
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+        $userSkills = $user ? $user->skills()->pluck('skills.id')->toArray() : [];
 
         return Inertia::render('Project/Show', [
             'project' => $project,

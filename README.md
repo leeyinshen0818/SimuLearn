@@ -4,48 +4,58 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 ## 🚧 Project Status: Under Development
 
-**Overall Progress:** 45%
-![Progress](https://geps.dev/progress/45)
+**Overall Progress:** 70%
+`██████████████████████████████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`
 
 ### 📅 Detailed Roadmap
 
 #### **Phase 0: Foundation & Setup** (✅ Completed)
 
+<small>
 -   [x] **Project Initialization**: Laravel 10 + React/Inertia setup.
 -   [x] **Database Architecture**: Initial schema design for Users, Skills, and Projects.
 -   [x] **Landing Page**: Responsive design with "Get Started" call-to-action.
 -   [x] **Environment Configuration**: CI/CD basics and local dev environment setup.
+</small>
 
 #### **Phase 1: User Onboarding & Profiling** (✅ Completed)
 
+<small>
 -   [x] **Authentication System**: Secure Login/Register flow (Laravel Breeze/Sanctum).
 -   [x] **Skill Profiling Wizard**: Multi-step form to capture user tech stack.
 -   [x] **AI Bio Summarization**: Integration with Google Gemini to generate professional summaries.
 -   [x] **User Dashboard**: Personalized dashboard with stats and profile management.
+</small>
 
 #### **Phase 2: Data Intelligence & Matching** (✅ Completed)
 
+<small>
 -   [x] **Project Database**: Seeding 24 comprehensive simulation projects across 3 difficulty tiers.
 -   [x] **Granular Task Structure**: Projects now feature tiered task lists (Beginner: 6+, Intermediate: 12+, Advanced: 18+) to guide users from setup to mastery.
 -   [x] **Matching Algorithm**: Logic to recommend projects based on user skill overlap and difficulty preference.
 -   [x] **Dashboard Recommendations**: Dynamic UI to display "Best Match" simulations.
 -   [x] **Project Filtering**: Filter projects by difficulty (Beginner, Intermediate, Advanced).
+</small>
 
 #### **Phase 3: The Simulation Core** (🚧 In Progress)
 
--   [ ] **Workspace Interface**: The main "IDE-like" view for working on projects.
--   [ ] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies.
--   [ ] **Task Detail View**: Markdown-rendered instructions, resources, and acceptance criteria.
+<small>
+-   [x] **Workspace Interface**: The main "IDE-like" view for working on projects.
+-   [x] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies.
+-   [x] **Task Detail View**: Markdown-rendered instructions, resources, and acceptance criteria.
 -   [ ] **Submission System**: File upload or text input for task deliverables.
 -   [ ] **Progress Tracking**: State management for locked/unlocked/completed tasks.
+</small>
 
 #### **Phase 4: Evaluation & Feedback Loop** (⏳ Pending)
 
+<small>
 -   [ ] **AI Code Reviewer**: Automated analysis of user submissions using LLMs.
 -   [ ] **Feedback Engine**: Generating constructive, specific feedback for improvements.
 -   [ ] **Scoring System**: XP/Points calculation based on code quality and efficiency.
 -   [ ] **Gamification**: Badges and achievements for milestones.
 -   [ ] **Career Analytics**: Charts showing skill growth over time.
+</small>
 
 ## 🚀 Core Philosophy
 
