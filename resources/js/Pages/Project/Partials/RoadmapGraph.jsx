@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import ReactFlow, {
     Background,
     Controls,
@@ -6,7 +6,8 @@ import ReactFlow, {
     useNodesState,
     useEdgesState,
     MarkerType,
-    Position
+    Position,
+    Handle
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
@@ -25,6 +26,74 @@ const getCategoryColor = (category) => categoryColors[category] || categoryColor
 
 const nodeWidth = 220;
 const nodeHeight = 100;
+
+// --- Custom Node Component ---
+const TaskNode = ({ data }) => {
+    const { task, isCompleted, isDAGLocked, isSkillLocked, isRecommended, categoryColor } = data;
+
+    return (
+        <div className={`flex flex-col h-full w-full bg-white rounded-md shadow-sm overflow-hidden border-2 ${isRecommended ? 'border-indigo-500' : (isDAGLocked ? 'border-gray-300 border-dashed' : 'border-gray-200')}`} style={{ width: '220px', minHeight: '90px' }}>
+            <Handle type="target" position={Position.Top} className="w-2 h-2 bg-gray-400" />
+
+            {/* Header Bar */}
+            <div
+                className="h-2 w-full"
+                style={{ backgroundColor: categoryColor }}
+            ></div>
+
+            {/* Content */}
+            <div className={`flex-1 p-3 flex flex-col justify-between ${isRecommended ? 'bg-indigo-50' : 'bg-white'}`}>
+                <div>
+                    <div className="font-bold text-sm text-gray-900 leading-tight line-clamp-2" title={task.title}>
+                        {task.title}
+                    </div>
+                </div>
+
+                <div className="flex justify-between items-end mt-2">
+                    {/* Status Indicator */}
+                    <div className="flex items-center">
+                        {isCompleted ? (
+                            <span className="text-xs font-medium text-green-600 flex items-center">
+                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                                Done
+                            </span>
+                        ) : isDAGLocked ? (
+                            <span className="text-xs font-medium text-gray-400 flex items-center">
+                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                                Locked
+                            </span>
+                        ) : isRecommended ? (
+                            <span className="text-xs font-bold text-indigo-600 flex items-center animate-pulse">
+                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                Start Here
+                            </span>
+                        ) : (
+                            <span className="text-xs font-medium text-blue-600 flex items-center">
+                                <span className="relative flex h-2 w-2 mr-1.5">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </span>
+                                Active
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Skill Warning */}
+                    {isSkillLocked && !isDAGLocked && !isCompleted && (
+                        <span className="text-xs text-yellow-600 font-bold" title="Missing Recommended Skills">
+                            ⚠ Skills
+                        </span>
+                    )}
+                </div>
+            </div>
+            <Handle type="source" position={Position.Bottom} className="w-2 h-2 bg-gray-400" />
+        </div>
+    );
+};
+
+const nodeTypes = {
+    taskNode: TaskNode,
+};
 
 const getLayoutedElements = (nodes, edges, direction = 'TB') => {
     const dagreGraph = new dagre.graphlib.Graph();
@@ -60,7 +129,7 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
     return { nodes, edges };
 };
 
-const RoadmapGraph = ({ projectTitle, tasks, userTasks, userSkills, onTaskClick }) => {
+const RoadmapGraph = ({ projectTitle, tasks, userTasks, userSkills, onTaskClick, recommendedTaskId }) => {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -88,17 +157,19 @@ const RoadmapGraph = ({ projectTitle, tasks, userTasks, userSkills, onTaskClick 
         // 1. Root Node (Project)
         initialNodes.push({
             id: 'root',
-            data: { label: <div className="font-bold text-lg text-center p-2">{projectTitle}</div> },
+            data: { label: <div className="font-bold text-lg text-center break-words w-full">{projectTitle}</div> },
             position: { x: 0, y: 0 },
             style: {
                 background: '#f3f4f6',
                 border: '2px solid #4b5563',
                 borderRadius: '8px',
                 width: nodeWidth,
-                height: 60,
+                minHeight: 60,
+                height: 'auto',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                padding: '8px'
             },
             connectable: false,
         });
@@ -144,78 +215,26 @@ const RoadmapGraph = ({ projectTitle, tasks, userTasks, userSkills, onTaskClick 
             const skillLocked = isSkillLocked(task);
             const categoryColor = getCategoryColor(task.category);
             const catId = `cat-${task.category || 'Other'}`;
-
-            // Formal Node Design
-            const label = (
-                <div className="flex flex-col h-full w-full">
-                    {/* Header Bar */}
-                    <div
-                        className="h-2 w-full rounded-t-md"
-                        style={{ backgroundColor: categoryColor }}
-                    ></div>
-
-                    {/* Content */}
-                    <div className="flex-1 p-3 flex flex-col justify-between bg-white rounded-b-md">
-                        <div>
-                            <div className="font-bold text-sm text-gray-900 leading-tight line-clamp-2" title={task.title}>
-                                {task.title}
-                            </div>
-                        </div>
-
-                        <div className="flex justify-between items-end mt-2">
-                            {/* Status Indicator */}
-                            <div className="flex items-center">
-                                {completed ? (
-                                    <span className="text-xs font-medium text-green-600 flex items-center">
-                                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                                        Done
-                                    </span>
-                                ) : dagLocked ? (
-                                    <span className="text-xs font-medium text-gray-400 flex items-center">
-                                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
-                                        Locked
-                                    </span>
-                                ) : (
-                                    <span className="text-xs font-medium text-blue-600 flex items-center">
-                                        <span className="relative flex h-2 w-2 mr-1.5">
-                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                                        </span>
-                                        Active
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* Skill Warning */}
-                            {skillLocked && !dagLocked && !completed && (
-                                <span className="text-xs text-yellow-600 font-bold" title="Missing Recommended Skills">
-                                    ⚠ Skills
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
+            const isRecommended = recommendedTaskId === task.id;
 
             initialNodes.push({
                 id: task.id.toString(),
-                data: { label },
+                type: 'taskNode', // Use custom node type
+                data: {
+                    task,
+                    isCompleted: completed,
+                    isDAGLocked: dagLocked,
+                    isSkillLocked: skillLocked,
+                    isRecommended,
+                    categoryColor
+                },
                 position: { x: 0, y: 0 }, // Calculated by dagre
                 style: {
-                    background: 'transparent',
-                    border: dagLocked ? '1px dashed #d1d5db' : '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    padding: 0,
                     width: nodeWidth,
-                    height: 'auto', // Let content dictate height, but dagre uses fixed
-                    minHeight: 90,
-                    boxShadow: !dagLocked && !completed ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' : 'none',
-                    opacity: dagLocked ? 0.7 : 1,
+                    height: nodeHeight,
                 },
                 connectable: false,
-            });
-
-            // Edge: Role -> Task
+            });            // Edge: Role -> Task
             initialEdges.push({
                 id: `e-${catId}-${task.id}`,
                 source: catId,
@@ -266,6 +285,7 @@ const RoadmapGraph = ({ projectTitle, tasks, userTasks, userSkills, onTaskClick 
                 edges={edges}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
+                nodeTypes={nodeTypes}
                 fitView
                 attributionPosition="bottom-right"
                 onNodeClick={(event, node) => {

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import RoadmapGraph from './Partials/RoadmapGraph';
 
-const ProjectShow = ({ auth, project, userSkills = [] }) => {
+const ProjectShow = ({ auth, project, userSkills = [], recommendedPath = [] }) => {
     const [expandedTask, setExpandedTask] = useState(null);
-    const [warningModal, setWarningModal] = useState({ isOpen: false, task: null, missingSkills: [] });
-    const [viewMode, setViewMode] = useState('graph'); // 'graph' or 'list'
+    const [selectedTask, setSelectedTask] = useState(null); // For Modal
+    const [viewMode, setViewMode] = useState('path'); // 'path', 'graph' or 'list'
 
     // Check if task is completed by the user
     const isTaskCompleted = (taskId) => {
@@ -41,81 +41,19 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
     };
 
     const handleTaskClick = (task) => {
-        const dagLocked = isDAGLocked(task);
-
-        if (dagLocked) {
-            // Optional: Show a message that it's locked by dependencies
-            return;
-        }
-
-        const skillLocked = isSkillLocked(task);
-        if (skillLocked && expandedTask !== task.id) {
-            const missing = getMissingSkills(task);
-            setWarningModal({ isOpen: true, task: task, missingSkills: missing });
-        }
-        toggleTask(task.id);
+        // Always open modal for details, regardless of lock status (user can see what they are missing)
+        setSelectedTask(task);
     };
 
-    const closeWarningModal = () => {
-        setWarningModal({ ...warningModal, isOpen: false });
+    const closeModal = () => {
+        setSelectedTask(null);
     };
+
+
 
     return (
         <div className="min-h-screen bg-gray-50">
             <Head title={project.title} />
-
-            {/* Warning Modal */}
-            {warningModal.isOpen && (
-                <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                    <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                        <div className="fixed inset-0 transition-opacity" aria-hidden="true" onClick={closeWarningModal}></div>
-                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                        <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                <div className="sm:flex sm:items-start">
-                                    <div className="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
-                                        <svg className="h-6 w-6 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                    </div>
-                                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                            Skill Gap Detected
-                                        </h3>
-                                        <div className="mt-2">
-                                            <p className="text-sm text-gray-500">
-                                                You are attempting <strong>{warningModal.task?.title}</strong>, but you are missing some recommended skills.
-                                            </p>
-                                            <div className="mt-4 bg-yellow-50 p-3 rounded-md border border-yellow-100">
-                                                <h4 className="text-xs font-semibold text-yellow-800 uppercase tracking-wider mb-2">Missing Skills</h4>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {warningModal.missingSkills.map(skill => (
-                                                        <span key={skill.id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-yellow-800 border border-yellow-200">
-                                                            {skill.name}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <p className="mt-4 text-sm text-gray-500">
-                                                Proceeding without these skills might be challenging. We recommend reviewing these topics, but you are free to learn by doing!
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                                <button
-                                    type="button"
-                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
-                                    onClick={closeWarningModal}
-                                >
-                                    I Understand, Proceed
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             <nav className="bg-white border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -134,6 +72,8 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
 
             <main className="py-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+
                     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                         <div className="px-4 py-5 sm:px-6">
                             <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -165,10 +105,21 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                         </div>
                                     </dd>
                                 </div>
+
                                 <div className="sm:col-span-2">
                                     <div className="flex justify-between items-center mb-4">
                                         <dt className="text-sm font-medium text-gray-500">Project Roadmap</dt>
                                         <div className="flex space-x-2 bg-gray-100 p-1 rounded-lg">
+                                            <button
+                                                onClick={() => setViewMode('path')}
+                                                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                                                    viewMode === 'path'
+                                                        ? 'bg-white text-gray-900 shadow'
+                                                        : 'text-gray-500 hover:text-gray-700'
+                                                }`}
+                                            >
+                                                AI Path
+                                            </button>
                                             <button
                                                 onClick={() => setViewMode('graph')}
                                                 className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
@@ -192,15 +143,89 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                         </div>
                                     </div>
                                     <dd className="mt-1 text-sm text-gray-900">
-                                        {viewMode === 'graph' ? (
+                                        {viewMode === 'path' ? (
+                                            <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-6">
+                                                <div className="flex items-center mb-6">
+                                                    <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-4">
+                                                        <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-lg font-bold text-indigo-900">
+                                                            AI Recommended Path
+                                                        </h3>
+                                                        <p className="text-sm text-indigo-700">
+                                                            Follow this optimized sequence to complete the project efficiently based on your skills.
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {recommendedPath && recommendedPath.length > 0 ? (
+                                                    <div className="relative">
+                                                        {/* Vertical line connecting items */}
+                                                        <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-indigo-200" style={{ top: '20px', bottom: '20px' }}></div>
+
+                                                        <div className="space-y-6">
+                                                            {recommendedPath.map((task, index) => (
+                                                                <div key={task.id} className="relative flex items-start group">
+                                                                    <div className={`
+                                                                        relative z-10 flex items-center justify-center h-16 w-16 rounded-full border-4
+                                                                        ${index === 0 ? 'bg-indigo-600 border-indigo-100 text-white shadow-lg' : 'bg-white border-indigo-100 text-gray-500'}
+                                                                        transition-all duration-200 group-hover:scale-110
+                                                                    `}>
+                                                                        <span className="text-xl font-bold">{index + 1}</span>
+                                                                    </div>
+
+                                                                    <div className="ml-6 flex-1 bg-white rounded-lg border border-indigo-100 p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                                                                         onClick={() => {
+                                                                             handleTaskClick(task);
+                                                                         }}
+                                                                    >
+                                                                        <div className="flex justify-between items-start">
+                                                                            <h4 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                                                                {task.title}
+                                                                            </h4>
+                                                                            {index === 0 && (
+                                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                                                    Recommended Next
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+                                                                            {task.description}
+                                                                        </p>
+                                                                        <div className="mt-3 flex items-center text-xs text-gray-500">
+                                                                            {task.skills && task.skills.length > 0 && (
+                                                                                <div className="flex flex-wrap gap-1">
+                                                                                    {task.skills.map(skill => (
+                                                                                        <span key={skill.id} className="bg-gray-100 px-2 py-1 rounded text-gray-600">
+                                                                                            {skill.name}
+                                                                                        </span>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-center py-8 text-gray-500">
+                                                        No specific path recommendations available at this time.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : viewMode === 'graph' ? (
                                             <RoadmapGraph
                                                 projectTitle={project.title}
                                                 tasks={project.tasks}
                                                 userTasks={project.tasks.flatMap(t => t.user_tasks || [])}
                                                 userSkills={userSkills}
+                                                recommendedTaskId={recommendedPath.length > 0 ? recommendedPath[0].id : null}
                                                 onTaskClick={(task) => {
                                                     handleTaskClick(task);
-                                                    setViewMode('list'); // Switch to list to show details
                                                 }}
                                             />
                                         ) : (
@@ -271,7 +296,9 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                                                                                             )}
                                                                                         </div>
                                                                                         <div className="ml-3">
-                                                                                            <div className={`text-sm font-medium ${dagLocked ? 'text-gray-500' : 'text-gray-900'}`}>{task.title}</div>
+                                                                                            <div className={`text-sm font-medium ${dagLocked ? 'text-gray-500' : 'text-gray-900'}`}>
+                                                                                                {task.title}
+                                                                                            </div>
                                                                                         </div>
                                                                                     </div>
                                                                                 </td>
@@ -378,6 +405,103 @@ const ProjectShow = ({ auth, project, userSkills = [] }) => {
                     </div>
                 </div>
             </main>
+
+            {/* Task Detail Modal */}
+            {selectedTask && (
+                <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={closeModal}></div>
+
+                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="sm:flex sm:items-start">
+                                    <div className={`mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10 ${isTaskCompleted(selectedTask.id) ? 'bg-green-100' : 'bg-indigo-100'}`}>
+                                        {isTaskCompleted(selectedTask.id) ? (
+                                            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                            {selectedTask.title}
+                                        </h3>
+                                        <div className="mt-2">
+                                            <p className="text-sm text-gray-500 mb-4">
+                                                {selectedTask.description}
+                                            </p>
+
+                                            {selectedTask.scenario && (
+                                                <div className="bg-gray-50 p-3 rounded-md mb-4">
+                                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Scenario</h4>
+                                                    <p className="text-sm text-gray-600 italic">{selectedTask.scenario}</p>
+                                                </div>
+                                            )}
+
+                                            <div className="mb-4">
+                                                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Expected Outcome</h4>
+                                                <p className="text-sm text-gray-600">{selectedTask.expected_outcome || "No specific outcome defined."}</p>
+                                            </div>
+
+                                            {selectedTask.skills && selectedTask.skills.length > 0 && (
+                                                <div className="mb-4">
+                                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Recommended Skills</h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {selectedTask.skills.map(skill => (
+                                                            <span key={skill.id} className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${userSkills.includes(skill.id) ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                                                {skill.name}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {isDAGLocked(selectedTask) && (
+                                                <div className="bg-red-50 border-l-4 border-red-400 p-4 mt-4">
+                                                    <div className="flex">
+                                                        <div className="ml-3">
+                                                            <p className="text-sm text-red-700">
+                                                                This task is currently locked. Complete prerequisite tasks first.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                {!isDAGLocked(selectedTask) && !isTaskCompleted(selectedTask.id) && (
+                                    <button
+                                        type="button"
+                                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                        onClick={() => {
+                                            // Handle start task action
+                                            closeModal();
+                                        }}
+                                    >
+                                        Start Task
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                    onClick={closeModal}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -33,9 +33,62 @@ class ProjectController extends Controller
         $user = auth()->user();
         $userSkills = $user ? $user->skills()->pluck('skills.id')->toArray() : [];
 
+        $recommendedPath = $this->getRecommendedTaskPath($project, $userSkills);
+
         return Inertia::render('Project/Show', [
             'project' => $project,
-            'userSkills' => $userSkills
+            'userSkills' => $userSkills,
+            'recommendedPath' => $recommendedPath
         ]);
+    }
+
+    private function getRecommendedTaskPath($project, $userSkills)
+    {
+        $tasks = $project->tasks;
+        $completedTaskIds = $tasks->filter(function ($task) {
+            return $task->userTasks->where('status', 'completed')->isNotEmpty();
+        })->pluck('id')->toArray();
+
+        // Filter for available tasks (not completed, prerequisites met)
+        $availableTasks = $tasks->filter(function ($task) use ($completedTaskIds) {
+            // Skip if already completed
+            if (in_array($task->id, $completedTaskIds)) {
+                return false;
+            }
+
+            // Check prerequisites
+            if ($task->prerequisites->isEmpty()) {
+                return true;
+            }
+
+            foreach ($task->prerequisites as $prerequisite) {
+                if (!in_array($prerequisite->id, $completedTaskIds)) {
+                    return false; // Locked
+                }
+            }
+
+            return true;
+        });
+
+        if ($availableTasks->isEmpty()) {
+            return [];
+        }
+
+        // Score available tasks based on skill match
+        $scoredTasks = $availableTasks->map(function ($task) use ($userSkills) {
+            $taskSkills = $task->skills->pluck('id')->toArray();
+
+            if (empty($taskSkills)) {
+                return ['task' => $task, 'score' => 0];
+            }
+
+            $matchingSkills = array_intersect($taskSkills, $userSkills);
+            $score = count($matchingSkills) / count($taskSkills); // Percentage match (0.0 to 1.0)
+
+            return ['task' => $task, 'score' => $score];
+        });
+
+        // Sort by score descending
+        return $scoredTasks->sortByDesc('score')->pluck('task')->values();
     }
 }
