@@ -4,8 +4,10 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 ## 🚧 Project Status: Under Development
 
-**Overall Progress:** 70%
-`██████████████████████████████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`
+**Overall Progress:** 40%
+`████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`
+
+> **Note:** This is the **MVP (Minimum Viable Product)** version. All features listed below are part of the initial development phase and will be enhanced in future updates.
 
 ### 📅 Detailed Roadmap
 
@@ -40,19 +42,20 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 #### **Phase 3: The Simulation Core** (🚧 In Progress)
 
 <small>
--   [x] **Workspace Interface**: The main "IDE-like" view for working on projects.
--   [x] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies.
--   [x] **Task Detail View**: Markdown-rendered instructions, resources, and acceptance criteria.
--   [ ] **Submission System**: File upload or text input for task deliverables.
+-   [ ] **Workspace Interface**: The main "IDE-like" view for working on projects.
+-   [ ] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies.
+-   [ ] **Task Detail View**: Markdown-rendered instructions, resources, and acceptance criteria.
+-   [ ] **Task Simulation**: Detailed instructions and scenario simulation (Pending).
+-   [ ] **Task Submission**: File upload or text input for task deliverables (Pending).
 -   [ ] **Progress Tracking**: State management for locked/unlocked/completed tasks.
 </small>
 
 #### **Phase 4: Evaluation & Feedback Loop** (⏳ Pending)
 
 <small>
--   [ ] **AI Code Reviewer**: Automated analysis of user submissions using LLMs.
+-   [ ] **Task Evaluation**: Automated analysis of user submissions using LLMs.
+-   [ ] **Performance Scoring**: XP/Points calculation based on code quality and efficiency.
 -   [ ] **Feedback Engine**: Generating constructive, specific feedback for improvements.
--   [ ] **Scoring System**: XP/Points calculation based on code quality and efficiency.
 -   [ ] **Gamification**: Badges and achievements for milestones.
 -   [ ] **Career Analytics**: Charts showing skill growth over time.
 </small>
