@@ -28,6 +28,7 @@ Route::post('/register', [AuthController::class, 'signup']);
 
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\MyProjectController;
 
 Route::get('/dashboard', function () {
     /** @var \App\Models\User $user */
@@ -71,5 +72,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/skills', [SkillController::class, 'create'])->name('profile.skills');
     Route::post('/profile/skills', [SkillController::class, 'store'])->name('profile.skills.store');
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
-Route::get('/project/{project}', [ProjectController::class, 'show'])->name('project.show');
+    Route::get('/project/{project}', [ProjectController::class, 'show'])->name('project.show');
+    Route::post('/projects/{project}/start', [MyProjectController::class, 'store'])->name('projects.start');
+    Route::get('/my-projects', [MyProjectController::class, 'index'])->name('my-projects.index');
+    Route::delete('/my-projects/{project}', [MyProjectController::class, 'destroy'])->name('my-projects.destroy');
 });

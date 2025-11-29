@@ -28,7 +28,8 @@ class User extends Authenticatable
 
     public function projects()
     {
-        return $this->hasMany(UserProject::class);
+        return $this->belongsToMany(Project::class, 'user_projects')
+            ->withPivot('status', 'started_at', 'completed_at');
     }
 
     public function tasks()

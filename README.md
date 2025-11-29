@@ -4,8 +4,8 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 ## 🚧 Project Status: Under Development
 
-**Overall Progress:** 40%
-`████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`
+**Overall Progress:** 45%
+`█████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`
 
 > **Note:** This is the **MVP (Minimum Viable Product)** version. All features listed below are part of the initial development phase and will be enhanced in future updates.
 
@@ -35,7 +35,10 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 #### **Phase 3: The Simulation Core** (🚧 In Progress)
 
--   [x] **Workspace Interface**: The main "IDE-like" view for working on projects.
+-   [x] **Project Library (Draft)**: Browse and filter available simulation projects.
+-   [x] **My Project Workspace (Draft)**: The main interface for enrolled projects.
+    -   [x] **Enrollment System**: Users can start projects, which initializes their task progress.
+    -   [x] **Project Management**: Users can remove projects (with data loss protection).
 -   [x] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies with auto-layout (Dagre).
 -   [x] **AI Recommended Path**: A linear, optimized sequence of tasks suggested by AI based on user skills.
 -   [x] **Task Detail View**: Interactive modal with scenario, expected outcomes, and skill requirements.

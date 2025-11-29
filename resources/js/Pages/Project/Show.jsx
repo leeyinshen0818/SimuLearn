@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import RoadmapGraph from './Partials/RoadmapGraph';
 
 const ProjectShow = ({ auth, project, userSkills = [], recommendedPath = [] }) => {
     const [expandedTask, setExpandedTask] = useState(null);
     const [selectedTask, setSelectedTask] = useState(null); // For Modal
     const [viewMode, setViewMode] = useState('path'); // 'path', 'graph' or 'list'
+    const [showStartModal, setShowStartModal] = useState(false);
+
+    const { post, processing } = useForm();
+
+    const startSimulation = () => {
+        post(`/projects/${project.id}/start`);
+    };
 
     // Check if task is completed by the user
     const isTaskCompleted = (taskId) => {
@@ -121,16 +128,6 @@ const ProjectShow = ({ auth, project, userSkills = [], recommendedPath = [] }) =
                                                 AI Path
                                             </button>
                                             <button
-                                                onClick={() => setViewMode('graph')}
-                                                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                                                    viewMode === 'graph'
-                                                        ? 'bg-white text-gray-900 shadow'
-                                                        : 'text-gray-500 hover:text-gray-700'
-                                                }`}
-                                            >
-                                                Graph View
-                                            </button>
-                                            <button
                                                 onClick={() => setViewMode('list')}
                                                 className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                                                     viewMode === 'list'
@@ -139,6 +136,16 @@ const ProjectShow = ({ auth, project, userSkills = [], recommendedPath = [] }) =
                                                 }`}
                                             >
                                                 List View
+                                            </button>
+                                            <button
+                                                onClick={() => setViewMode('graph')}
+                                                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                                                    viewMode === 'graph'
+                                                        ? 'bg-white text-gray-900 shadow'
+                                                        : 'text-gray-500 hover:text-gray-700'
+                                                }`}
+                                            >
+                                                Graph View
                                             </button>
                                         </div>
                                     </div>
@@ -398,13 +405,68 @@ const ProjectShow = ({ auth, project, userSkills = [], recommendedPath = [] }) =
                             </dl>
                         </div>
                         <div className="bg-gray-50 px-4 py-4 sm:px-6 flex justify-end">
-                            <button className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setShowStartModal(true);
+                                }}
+                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                disabled={processing}
+                            >
                                 Start Simulation
                             </button>
                         </div>
                     </div>
                 </div>
             </main>
+
+            {/* Start Simulation Confirmation Modal */}
+            {showStartModal && (
+                <div className="fixed inset-0 z-50 overflow-y-auto" style={{ zIndex: 9999 }} aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={() => setShowStartModal(false)}></div>
+
+                        <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="sm:flex sm:items-start">
+                                    <div className="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                                        <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    </div>
+                                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                            Start Simulation
+                                        </h3>
+                                        <div className="mt-2">
+                                            <p className="text-sm text-gray-500">
+                                                Are you sure you want to start this project? This will enroll you in the project and take you to the simulation dashboard where you can begin working on tasks.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button
+                                    type="button"
+                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                    onClick={startSimulation}
+                                    disabled={processing}
+                                >
+                                    {processing ? 'Starting...' : 'Confirm & Start'}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                    onClick={() => setShowStartModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Task Detail Modal */}
             {selectedTask && (
