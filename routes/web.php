@@ -47,6 +47,17 @@ Route::get('/dashboard', function () {
                 $totalSkillsCount = $project->skills->count();
                 $matchPercentage = $totalSkillsCount > 0 ? ($matchingSkillsCount / $totalSkillsCount) * 100 : 0;
 
+                // Calculate weighted score: Match Percentage * Difficulty Weight
+                // Beginner: 1, Intermediate: 2, Advanced: 3
+                $difficultyWeight = match ($project->difficulty_level) {
+                    'intermediate' => 2,
+                    'advanced' => 3,
+                    default => 1,
+                };
+
+                // Boost score if user has high match on harder projects
+                $recommendationScore = $matchPercentage * $difficultyWeight;
+
                 return [
                     'id' => $project->id,
                     'title' => $project->title,
@@ -55,9 +66,10 @@ Route::get('/dashboard', function () {
                     'skills' => $project->skills->pluck('name'),
                     'tasks_count' => $project->tasks->count(),
                     'match_percentage' => $matchPercentage,
+                    'recommendation_score' => $recommendationScore,
                 ];
             })
-            ->sortByDesc('match_percentage')
+            ->sortByDesc('recommendation_score')
             ->take(3)
             ->values();
     }

@@ -74,21 +74,18 @@ class ProjectController extends Controller
             return [];
         }
 
-        // Score available tasks based on skill match
-        $scoredTasks = $availableTasks->map(function ($task) use ($userSkills) {
+        // Filter tasks where user has ALL required skills
+        $recommendedTasks = $availableTasks->filter(function ($task) use ($userSkills) {
             $taskSkills = $task->skills->pluck('id')->toArray();
 
             if (empty($taskSkills)) {
-                return ['task' => $task, 'score' => 0];
+                return true;
             }
 
             $matchingSkills = array_intersect($taskSkills, $userSkills);
-            $score = count($matchingSkills) / count($taskSkills); // Percentage match (0.0 to 1.0)
-
-            return ['task' => $task, 'score' => $score];
+            return count($matchingSkills) === count($taskSkills);
         });
 
-        // Sort by score descending
-        return $scoredTasks->sortByDesc('score')->pluck('task')->values();
+        return $recommendedTasks->values();
     }
 }
