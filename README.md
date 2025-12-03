@@ -4,8 +4,8 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 ## 🚧 Project Status: Under Development
 
-**Overall Progress:** 45%
-`█████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`
+**Overall Progress:** 60%
+`████████████████████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`
 
 > **Note:** This is the **MVP (Minimum Viable Product)** version. All features listed below are part of the initial development phase and will be enhanced in future updates.
 
@@ -23,7 +23,7 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 -   [x] **Authentication System**: Secure Login/Register flow (Laravel Breeze/Sanctum).
 -   [x] **Skill Profiling Wizard**: Multi-step form to capture user tech stack.
 -   [x] **AI Bio Summarization**: Integration with Google Gemini to generate professional summaries.
--   [x] **User Dashboard**: Personalized dashboard with stats and profile management.
+-   [x] **User Dashboard**: Personalized dashboard with real-time stats (Active Projects, Completed Tasks, Skills) and dynamic welcome logic.
 
 #### **Phase 2: Data Intelligence & Matching** (✅ Completed)
 
@@ -33,21 +33,23 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 -   [x] **Dashboard Recommendations**: Dynamic UI to display "Best Match" simulations.
 -   [x] **Project Filtering**: Filter projects by difficulty (Beginner, Intermediate, Advanced).
 
-#### **Phase 3: The Simulation Core** (🚧 In Progress)
+#### **Phase 3: The Simulation Core** (✅ Completed)
 
--   [x] **Project Library (Draft)**: Browse and filter available simulation projects.
--   [x] **My Project Workspace (Draft)**: The main interface for enrolled projects.
+-   [x] **Project Library**: Browse and filter available simulation projects.
+-   [x] **My Project Workspace**: The main interface for enrolled projects.
     -   [x] **Enrollment System**: Users can start projects, which initializes their task progress.
     -   [x] **Project Management**: Users can remove projects (with data loss protection).
--   [x] **Task Navigation (DAG)**: Interactive graph (React Flow) showing task dependencies with auto-layout (Dagre).
--   [x] **AI Recommended Path**: A linear, optimized sequence of tasks suggested by AI based on user skills.
--   [x] **Task Detail View**: Interactive modal with scenario, expected outcomes, and skill requirements.
--   [x] **Progress Tracking**: Visual state management for locked/unlocked/completed tasks across Graph, List, and Path views.
--   [ ] **Task Submission**: File upload or text input for task deliverables (Pending).
+-   [x] **Task Navigation**: Linear roadmap view showing task progression and status.
+-   [x] **Task Detail View**: Interactive workspace with scenario, expected outcomes, and skill requirements.
+-   [x] **Resource System**: Secure download of project assets/resources per task.
+-   [x] **Submission System**: 
+    -   [x] **File Upload**: ZIP-based submission for task deliverables.
+    -   [x] **State Management**: Handling "Pending Review" states to prevent auto-completion before grading.
+    -   [x] **Submission Management**: Ability to remove/replace files before final grading.
 
-#### **Phase 4: Evaluation & Feedback Loop** (⏳ Pending)
+#### **Phase 4: Evaluation & Feedback Loop** (🚧 In Progress)
 
--   [ ] **Task Evaluation**: Automated analysis of user submissions using LLMs.
+-   [ ] **AI Grading Engine**: Automated analysis of user submissions using LLMs.
 -   [ ] **Performance Scoring**: XP/Points calculation based on code quality and efficiency.
 -   [ ] **Feedback Engine**: Generating constructive, specific feedback for improvements.
 -   [ ] **Gamification**: Badges and achievements for milestones.
