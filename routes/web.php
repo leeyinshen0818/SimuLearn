@@ -29,6 +29,7 @@ Route::post('/register', [AuthController::class, 'signup']);
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\MyProjectController;
+use App\Http\Controllers\SubmissionController;
 
 Route::get('/dashboard', function () {
     /** @var \App\Models\User $user */
@@ -74,9 +75,16 @@ Route::get('/dashboard', function () {
             ->values();
     }
 
+    $enrolledProjectsCount = $user->projects()->count();
+    $completedTasksCount = $user->tasks()->where('status', 'completed')->count();
+    $skillsCount = $user->skills()->count();
+
     return Inertia::render('Dashboard', [
         'profileCompleted' => $hasSkills || $hasBio,
-        'recommendedProjects' => $recommendedProjects
+        'recommendedProjects' => $recommendedProjects,
+        'enrolledProjectsCount' => $enrolledProjectsCount,
+        'completedTasksCount' => $completedTasksCount,
+        'skillsCount' => $skillsCount,
     ]);
 })->middleware('auth')->name('dashboard');
 
@@ -88,4 +96,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/start', [MyProjectController::class, 'store'])->name('projects.start');
     Route::get('/my-projects', [MyProjectController::class, 'index'])->name('my-projects.index');
     Route::delete('/my-projects/{project}', [MyProjectController::class, 'destroy'])->name('my-projects.destroy');
+    Route::get('/tasks/{task}/download-resources', [MyProjectController::class, 'downloadResources'])->name('tasks.download-resources');
+    Route::post('/tasks/{task}/submit', [SubmissionController::class, 'store'])->name('tasks.submit');
 });

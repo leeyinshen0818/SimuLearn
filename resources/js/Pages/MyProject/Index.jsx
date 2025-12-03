@@ -5,10 +5,25 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
 
     const [displayedTask, setDisplayedTask] = React.useState(currentTask);
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+    const [showSubmissionModal, setShowSubmissionModal] = React.useState(false);
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        file: null,
+    });
 
     React.useEffect(() => {
         setDisplayedTask(currentTask);
     }, [currentTask]);
+
+    const submitSolution = (e) => {
+        e.preventDefault();
+        post(`/tasks/${displayedTask.id}/submit`, {
+            onSuccess: () => {
+                setShowSubmissionModal(false);
+                reset();
+            },
+        });
+    };
 
     // Helper to calculate progress percentage
     const calculateProgress = (project) => {
@@ -194,16 +209,65 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                                             <div className="border-t border-gray-200 pt-6 mt-6">
                                                 <div className="flex items-center justify-between">
                                                     <div className="text-sm text-gray-500">
-                                                        {displayedTask.id === currentTask?.id ? 'Ready to submit your work?' : 'This is a preview of the task.'}
+                                                        {(() => {
+                                                            const userTask = displayedTask.user_tasks && displayedTask.user_tasks[0];
+                                                            const isCompleted = userTask && userTask.status === 'completed';
+                                                            const submissions = userTask ? userTask.submissions : [];
+                                                            const latestSubmission = submissions.length > 0 ? submissions[submissions.length - 1] : null;
+                                                            const isPending = latestSubmission && latestSubmission.status === 'pending';
+
+                                                            if (isCompleted) return 'Great job! This task is complete.';
+                                                            if (isPending) return 'Your submission is under review.';
+                                                            return displayedTask.id === currentTask?.id ? 'Ready to submit your work?' : 'This is a preview of the task.';
+                                                        })()}
                                                     </div>
-                                                    {displayedTask.id === currentTask?.id && (
-                                                        <button
-                                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                                            onClick={() => alert('Submission feature coming soon!')}
-                                                        >
-                                                            Mark as Completed
-                                                        </button>
-                                                    )}
+                                                    <div className="flex space-x-3">
+                                                        {displayedTask.resource_file_path && (
+                                                            <a
+                                                                href={`/tasks/${displayedTask.id}/download-resources`}
+                                                                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                            >
+                                                                <svg className="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                </svg>
+                                                                Download Resources
+                                                            </a>
+                                                        )}
+                                                        {displayedTask.id === currentTask?.id && (
+                                                            (() => {
+                                                                const userTask = displayedTask.user_tasks && displayedTask.user_tasks[0];
+                                                                const isCompleted = userTask && userTask.status === 'completed';
+                                                                const submissions = userTask ? userTask.submissions : [];
+                                                                const latestSubmission = submissions.length > 0 ? submissions[submissions.length - 1] : null;
+                                                                const isPending = latestSubmission && latestSubmission.status === 'pending';
+
+                                                                if (isCompleted) return null;
+
+                                                                if (isPending) {
+                                                                    return (
+                                                                        <button
+                                                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 cursor-not-allowed"
+                                                                            disabled
+                                                                        >
+                                                                            <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                            </svg>
+                                                                            Pending Review
+                                                                        </button>
+                                                                    );
+                                                                }
+
+                                                                return (
+                                                                    <button
+                                                                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                                        onClick={() => setShowSubmissionModal(true)}
+                                                                    >
+                                                                        Submit
+                                                                    </button>
+                                                                );
+                                                            })()
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -228,6 +292,9 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                                     <ul className="divide-y divide-gray-200">
                                         {activeProject.tasks && activeProject.tasks.map((task, index) => {
                                             const userTask = task.user_tasks && task.user_tasks[0];
+                                            const submissions = userTask ? userTask.submissions : [];
+                                            const latestSubmission = submissions && submissions.length > 0 ? submissions[submissions.length - 1] : null;
+                                            const isPending = latestSubmission && latestSubmission.status === 'pending';
                                             const isCompleted = userTask && userTask.status === 'completed';
                                             const isCurrent = currentTask && task.id === currentTask.id;
                                             const isDisplayed = displayedTask && task.id === displayedTask.id;
@@ -242,11 +309,16 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                                                         <div className="flex items-center">
                                                             <div className={`shrink-0 h-8 w-8 flex items-center justify-center rounded-full font-bold text-xs mr-4 ${
                                                                 isCompleted ? 'bg-green-100 text-green-800' :
+                                                                isPending ? 'bg-yellow-100 text-yellow-800' :
                                                                 isCurrent ? 'bg-indigo-600 text-white' :
                                                                 'bg-gray-100 text-gray-500'
                                                             }`}>
                                                                 {isCompleted ? (
                                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                                                ) : isPending ? (
+                                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
                                                                 ) : (
                                                                     index + 1
                                                                 )}
@@ -264,6 +336,10 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                                                             {isCompleted ? (
                                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                                     Completed
+                                                                </span>
+                                                            ) : isPending ? (
+                                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                    Pending Review
                                                                 </span>
                                                             ) : isCurrent ? (
                                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
@@ -387,6 +463,116 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                                     Cancel
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Submission Modal */}
+            {showSubmissionModal && displayedTask && (
+                <div className="fixed inset-0 z-50 overflow-y-auto" style={{ zIndex: 9999 }} aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={() => setShowSubmissionModal(false)}></div>
+
+                        <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <form onSubmit={submitSolution}>
+                                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <div className="sm:flex sm:items-start">
+                                        <div className="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                                            <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                            </svg>
+                                        </div>
+                                        <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                            <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                                Submit Solution
+                                            </h3>
+                                            <div className="mt-2">
+                                                <p className="text-sm text-gray-500 mb-4">
+                                                    Please upload your solution for <strong>{displayedTask.title}</strong>.
+                                                    Your submission should be a single <strong>.zip</strong> file containing all necessary source code and assets.
+                                                </p>
+
+                                                <div className="mt-4">
+                                                    <label className="block text-sm font-medium text-gray-700">
+                                                        Solution File (.zip)
+                                                    </label>
+
+                                                    {!data.file ? (
+                                                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                                            <div className="space-y-1 text-center">
+                                                                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                                </svg>
+                                                                <div className="flex text-sm text-gray-600">
+                                                                    <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                                                                        <span>Upload a file</span>
+                                                                        <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".zip" onChange={e => setData('file', e.target.files[0])} />
+                                                                    </label>
+                                                                    <p className="pl-1">or drag and drop</p>
+                                                                </div>
+                                                                <p className="text-xs text-gray-500">
+                                                                    ZIP up to 20MB
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="mt-1 flex items-center justify-between px-6 py-4 border-2 border-indigo-300 border-dashed rounded-md bg-indigo-50">
+                                                            <div className="flex items-center">
+                                                                <svg className="h-8 w-8 text-indigo-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                </svg>
+                                                                <div>
+                                                                    <p className="text-sm font-medium text-indigo-700 truncate max-w-xs">
+                                                                        {data.file.name}
+                                                                    </p>
+                                                                    <p className="text-xs text-indigo-500">
+                                                                        {(data.file.size / 1024 / 1024).toFixed(2)} MB
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setData('file', null)}
+                                                                className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                                title="Remove file"
+                                                            >
+                                                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                    {errors.file && (
+                                                        <p className="mt-2 text-sm text-red-600">
+                                                            {errors.file}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button
+                                        type="submit"
+                                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                        disabled={processing}
+                                    >
+                                        {processing ? 'Uploading...' : 'Submit Solution'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                        onClick={() => {
+                                            setShowSubmissionModal(false);
+                                            reset();
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>

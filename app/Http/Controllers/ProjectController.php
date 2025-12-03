@@ -49,33 +49,13 @@ class ProjectController extends Controller
             return $task->userTasks->where('status', 'completed')->isNotEmpty();
         })->pluck('id')->toArray();
 
-        // Filter for available tasks (not completed, prerequisites met)
-        $availableTasks = $tasks->filter(function ($task) use ($completedTaskIds) {
+        // Filter tasks where user has ALL required skills (ignoring prerequisites)
+        $recommendedTasks = $tasks->filter(function ($task) use ($userSkills, $completedTaskIds) {
             // Skip if already completed
             if (in_array($task->id, $completedTaskIds)) {
                 return false;
             }
 
-            // Check prerequisites
-            if ($task->prerequisites->isEmpty()) {
-                return true;
-            }
-
-            foreach ($task->prerequisites as $prerequisite) {
-                if (!in_array($prerequisite->id, $completedTaskIds)) {
-                    return false; // Locked
-                }
-            }
-
-            return true;
-        });
-
-        if ($availableTasks->isEmpty()) {
-            return [];
-        }
-
-        // Filter tasks where user has ALL required skills
-        $recommendedTasks = $availableTasks->filter(function ($task) use ($userSkills) {
             $taskSkills = $task->skills->pluck('id')->toArray();
 
             if (empty($taskSkills)) {

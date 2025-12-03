@@ -26,4 +26,9 @@ class UserTask extends Model
     {
         return $this->belongsTo(Task::class);
     }
+
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 
-const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
+const Dashboard = ({ auth, profileCompleted, recommendedProjects = [], enrolledProjectsCount = 0, completedTasksCount = 0, skillsCount = 0 }) => {
     const { user } = auth;
 
     return (
@@ -84,7 +84,7 @@ const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
                 </header>
 
                 <main className="flex-1 overflow-y-auto p-8">
-                    {profileCompleted && (
+                    {profileCompleted && enrolledProjectsCount === 0 && (
                         <div className="mb-8 bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg p-6 text-white animate-fade-in">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -115,7 +115,7 @@ const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
                                     <div className="ml-5 w-0 flex-1">
                                         <dl>
                                             <dt className="text-sm font-medium text-gray-500 truncate">Active Projects</dt>
-                                            <dd className="text-lg font-medium text-gray-900">0</dd>
+                                            <dd className="text-lg font-medium text-gray-900">{enrolledProjectsCount}</dd>
                                         </dl>
                                     </div>
                                 </div>
@@ -135,7 +135,7 @@ const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
                                     <div className="ml-5 w-0 flex-1">
                                         <dl>
                                             <dt className="text-sm font-medium text-gray-500 truncate">Tasks Completed</dt>
-                                            <dd className="text-lg font-medium text-gray-900">0</dd>
+                                            <dd className="text-lg font-medium text-gray-900">{completedTasksCount}</dd>
                                         </dl>
                                     </div>
                                 </div>
@@ -154,8 +154,8 @@ const Dashboard = ({ auth, profileCompleted, recommendedProjects = [] }) => {
                                     </div>
                                     <div className="ml-5 w-0 flex-1">
                                         <dl>
-                                            <dt className="text-sm font-medium text-gray-500 truncate">Skill Level</dt>
-                                            <dd className="text-lg font-medium text-gray-900">Novice</dd>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">Skills Acquired</dt>
+                                            <dd className="text-lg font-medium text-gray-900">{skillsCount}</dd>
                                         </dl>
                                     </div>
                                 </div>

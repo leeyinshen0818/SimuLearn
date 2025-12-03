@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class MyProjectController extends Controller
@@ -35,23 +36,71 @@ class MyProjectController extends Controller
         if ($activeProject) {
             // Load tasks for the active project
             $activeProject->load(['tasks.userTasks' => function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            }]);
+                $query->where('user_id', $user->id)->with('submissions');
+            }, 'tasks.skills', 'tasks.prerequisites']);
 
-            // Determine the current task (first non-completed task, or the last one if all completed)
-            $currentTask = $activeProject->tasks->first(function ($task) {
+            // Filter tasks: Show Completed OR (Prerequisites Met AND Skills Match)
+            $userSkills = $user->skills()->pluck('skills.id')->toArray();
+
+            $filteredTasks = $activeProject->tasks->filter(function ($task) use ($userSkills) {
                 $userTask = $task->userTasks->first();
-                return !$userTask || $userTask->status !== 'completed';
+                $isCompleted = $userTask && $userTask->status === 'completed';
+
+                if ($isCompleted) {
+                    return true;
+                }
+
+                // Check prerequisites
+                $prereqsMet = $task->prerequisites->every(function ($prereq) use ($task) {
+                    // We need to check if the prerequisite is completed.
+                    // Since we are iterating the collection, we can't easily check the *other* task's userTask without loading it.
+                    // Fortunately, we loaded 'tasks.userTasks' for the whole project, but $task->prerequisites is a relation.
+                    // We need to check the user_tasks table or the loaded relation on the prerequisite if it was loaded recursively?
+                    // No, 'tasks.prerequisites' loads the Task models for prerequisites. It DOES NOT automatically load their userTasks.
+
+                    // However, we can check the 'user_tasks' table directly or use the collection if we map IDs.
+                    // Let's use a simpler approach: Get all completed task IDs first.
+                    return true;
+                });
+
+                return true;
+            });
+
+            // Re-implementing filter with prepared data
+            $allTasks = $activeProject->tasks;
+            $completedTaskIds = $allTasks->filter(function ($t) {
+                $ut = $t->userTasks->first();
+                return $ut && $ut->status === 'completed';
+            })->pluck('id')->toArray();
+
+            $filteredTasks = $allTasks->filter(function ($task) use ($userSkills, $completedTaskIds) {
+                // 1. Keep Completed
+                if (in_array($task->id, $completedTaskIds)) {
+                    return true;
+                }
+
+                // 2. Check Skills (Show if skills match, regardless of prerequisites)
+                $taskSkills = $task->skills->pluck('id')->toArray();
+                if (!empty($taskSkills)) {
+                    $matchingSkills = array_intersect($taskSkills, $userSkills);
+                    if (count($matchingSkills) !== count($taskSkills)) {
+                        return false; // Missing skills
+                    }
+                }
+
+                return true;
+            });
+
+            $activeProject->setRelation('tasks', $filteredTasks->values());
+
+            // Determine the current task (first non-completed task from the filtered list)
+            $currentTask = $filteredTasks->first(function ($task) use ($completedTaskIds) {
+                return !in_array($task->id, $completedTaskIds);
             });
 
             // If no current task found (all completed?), maybe show the last one or a summary
             if (!$currentTask) {
-                $currentTask = $activeProject->tasks->last();
-            }
-
-            // Load specific details for the current task view
-            if ($currentTask) {
-                 $currentTask->load('skills');
+                $currentTask = $filteredTasks->last();
             }
         }
 
@@ -103,5 +152,20 @@ class MyProjectController extends Controller
         $user->tasks()->whereIn('task_id', $taskIds)->delete();
 
         return redirect()->route('my-projects.index');
+    }
+
+    public function downloadResources(Task $task)
+    {
+        if (!$task->resource_file_path) {
+            abort(404);
+        }
+
+        // Check if user is enrolled in the project
+        $user = auth()->user();
+        if (!$user->projects()->where('projects.id', $task->project_id)->exists()) {
+            abort(403);
+        }
+
+        return Storage::download($task->resource_file_path);
     }
 }
