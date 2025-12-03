@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -161,7 +162,9 @@ class MyProjectController extends Controller
         }
 
         // Check if user is enrolled in the project
+        /** @var \App\Models\User $user */
         $user = auth()->user();
+
         if (!$user->projects()->where('projects.id', $task->project_id)->exists()) {
             abort(403);
         }

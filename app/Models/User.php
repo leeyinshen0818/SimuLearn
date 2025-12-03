@@ -26,7 +26,7 @@ class User extends Authenticatable
         'bio_summary',
     ];
 
-    public function projects()
+    public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'user_projects')
             ->withPivot('status', 'started_at', 'completed_at');
