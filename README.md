@@ -42,7 +42,7 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 -   [x] **Task Navigation**: Linear roadmap view showing task progression and status.
 -   [x] **Task Detail View**: Interactive workspace with scenario, expected outcomes, and skill requirements.
 -   [x] **Resource System**: Secure download of project assets/resources per task.
--   [x] **Submission System**: 
+-   [x] **Submission System**:
     -   [x] **File Upload**: ZIP-based submission for task deliverables.
     -   [x] **State Management**: Handling "Pending Review" states to prevent auto-completion before grading.
     -   [x] **Submission Management**: Ability to remove/replace files before final grading.
