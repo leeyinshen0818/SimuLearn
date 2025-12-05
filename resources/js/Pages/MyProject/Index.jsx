@@ -215,9 +215,11 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                                                             const submissions = userTask ? userTask.submissions : [];
                                                             const latestSubmission = submissions.length > 0 ? submissions[submissions.length - 1] : null;
                                                             const isPending = latestSubmission && latestSubmission.status === 'pending';
+                                                            const isGraded = latestSubmission && latestSubmission.status === 'graded';
 
                                                             if (isCompleted) return 'Great job! This task is complete.';
                                                             if (isPending) return 'Your submission is under review.';
+                                                            if (isGraded) return 'Your submission has been graded.';
                                                             return displayedTask.id === currentTask?.id ? 'Ready to submit your work?' : 'This is a preview of the task.';
                                                         })()}
                                                     </div>
@@ -240,23 +242,46 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                                                                 const submissions = userTask ? userTask.submissions : [];
                                                                 const latestSubmission = submissions.length > 0 ? submissions[submissions.length - 1] : null;
                                                                 const isPending = latestSubmission && latestSubmission.status === 'pending';
+                                                                const isGraded = latestSubmission && latestSubmission.status === 'graded';
 
-                                                                if (isCompleted) return null;
-
+                                                                // If pending, show status and remove button
                                                                 if (isPending) {
                                                                     return (
-                                                                        <button
-                                                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 cursor-not-allowed"
-                                                                            disabled
-                                                                        >
-                                                                            <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                            </svg>
-                                                                            Pending Review
-                                                                        </button>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-yellow-800 bg-yellow-100 cursor-default">
+                                                                                <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                                </svg>
+                                                                                Pending Review
+                                                                            </span>
+                                                                            <Link
+                                                                                href={`/submissions/${latestSubmission.id}`}
+                                                                                method="delete"
+                                                                                as="button"
+                                                                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                                                preserveScroll
+                                                                            >
+                                                                                Remove
+                                                                            </Link>
+                                                                        </div>
                                                                     );
                                                                 }
 
+                                                                // If graded OR completed, allow re-attempt
+                                                                if (isGraded || isCompleted) {
+                                                                    return (
+                                                                        <div className="flex items-center gap-2">
+                                                                            {isCompleted && (
+                                                                                <span className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-green-700 bg-green-100 border border-green-200">
+                                                                                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                                                                    Completed
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                }
+
+                                                                // Default: Submit button
                                                                 return (
                                                                     <button
                                                                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -269,6 +294,57 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                                                         )}
                                                     </div>
                                                 </div>
+
+                                                {/* Grading Result Section */}
+                                                {(() => {
+                                                    const userTask = displayedTask.user_tasks && displayedTask.user_tasks[0];
+                                                    const submissions = userTask ? userTask.submissions : [];
+                                                    const latestSubmission = submissions.length > 0 ? submissions[submissions.length - 1] : null;
+
+                                                    if (latestSubmission && latestSubmission.status === 'graded') {
+                                                        const isPassing = latestSubmission.score >= 60;
+                                                        return (
+                                                            <div className={`mt-6 border-t pt-6 ${isPassing ? 'border-green-100' : 'border-red-100'}`}>
+                                                                <div className={`rounded-lg p-6 ${isPassing ? 'bg-green-50' : 'bg-red-50'}`}>
+                                                                    <div className="flex items-center justify-between mb-4">
+                                                                        <h4 className={`text-lg font-bold ${isPassing ? 'text-green-800' : 'text-red-800'}`}>
+                                                                            Grading Result
+                                                                        </h4>
+                                                                        <span className={`text-2xl font-bold ${isPassing ? 'text-green-600' : 'text-red-600'}`}>
+                                                                            {latestSubmission.score}/100
+                                                                        </span>
+                                                                    </div>
+
+                                                                    <div className="prose prose-sm max-w-none">
+                                                                        <div className="bg-white rounded p-4 border border-gray-200 shadow-sm">
+                                                                            <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Feedback</h5>
+                                                                            <p className="text-gray-700 whitespace-pre-wrap">{latestSubmission.feedback}</p>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {!isPassing && (
+                                                                        <div className="mt-4 flex items-center text-sm text-red-700">
+                                                                            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                                            </svg>
+                                                                            Score below 60. Please review the feedback and try again to proceed.
+                                                                        </div>
+                                                                    )}
+
+                                                                    <div className="mt-6 flex justify-end">
+                                                                        <button
+                                                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                                            onClick={() => setShowSubmissionModal(true)}
+                                                                        >
+                                                                            {isPassing ? 'Improve Score' : 'Re-attempt'}
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
                                             </div>
                                         </div>
                                     </div>

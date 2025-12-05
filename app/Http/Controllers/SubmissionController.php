@@ -8,9 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
+use App\Services\GradingService;
+
 class SubmissionController extends Controller
 {
-    public function store(Request $request, $taskId)
+    public function store(Request $request, $taskId, GradingService $grader)
     {
         $request->validate([
             'file' => 'required|file|mimes:zip|max:20480', // Max 20MB
@@ -39,12 +41,47 @@ class SubmissionController extends Controller
                 'status' => 'pending',
             ]);
 
-            // We do NOT mark the task as completed yet.
-            // It remains in its current status (e.g. 'unlocked') until graded.
+            // Trigger Grading Immediately
+            try {
+                $result = $grader->grade($submission);
 
-            return back()->with('success', 'Solution submitted successfully! It is now pending review.');
+                // If score is passing (>= 60), mark task as completed
+                if ($result['score'] >= 60) {
+                    $userTask->update([
+                        'status' => 'completed',
+                        'completed_at' => now(),
+                    ]);
+                    return back()->with('success', "Solution graded! Score: {$result['score']}. Task Completed!");
+                } else {
+                    return back()->with('warning', "Solution graded. Score: {$result['score']}. Please review feedback and try again.");
+                }
+
+            } catch (\Exception $e) {
+                // If grading fails, keep it as pending
+                return back()->with('success', 'Solution submitted! Grading is processing in background.');
+            }
         }
 
         return back()->with('error', 'File upload failed.');
+    }
+
+    public function destroy(Submission $submission)
+    {
+        if ($submission->userTask->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($submission->status !== 'pending') {
+            return back()->with('error', 'Cannot remove a submission that has already been graded.');
+        }
+
+        // Delete file
+        if (Storage::exists($submission->file_path)) {
+            Storage::delete($submission->file_path);
+        }
+
+        $submission->delete();
+
+        return back()->with('success', 'Submission removed successfully.');
     }
 }

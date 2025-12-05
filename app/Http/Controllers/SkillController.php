@@ -79,15 +79,27 @@ class SkillController extends Controller
         Log::info('Gemini Key configured: ' . (env('GEMINI_API_KEY') ? 'Yes' : 'No'));
 
         // Try Gemini first if key exists
-        if ($bio && env('GEMINI_API_KEY')) {
+        if ((!empty($selectedSkillIds) || $bio) && env('GEMINI_API_KEY')) {
             try {
                 $apiKey = env('GEMINI_API_KEY');
-                Log::info('SkillController: Calling Gemini API');
-                $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
+                Log::info('SkillController: Calling Gemini API for Analysis');
+
+                // Get skill names
+                $skillNames = Skill::whereIn('id', $selectedSkillIds)->pluck('name')->toArray();
+                $skillsString = implode(', ', $skillNames);
+
+                $prompt = "You are a technical career analyst. Analyze the following developer profile:\n\n";
+                $prompt .= "Skills: " . $skillsString . "\n";
+                if ($bio) {
+                    $prompt .= "Bio: " . $bio . "\n";
+                }
+                $prompt .= "\nBased on this, list 3-5 key technical capabilities and potential roles for this developer. Format the output as a concise bulleted list (using •). Do not include introductory text.";
+
+                $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}", [
                     'contents' => [
                         [
                             'parts' => [
-                                ['text' => "You are a professional career consultant. Summarize the following professional bio into a concise, formal summary suitable for a developer profile (max 3 sentences):\n\n" . $bio]
+                                ['text' => $prompt]
                             ]
                         ]
                     ]

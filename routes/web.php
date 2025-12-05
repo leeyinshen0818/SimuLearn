@@ -98,4 +98,5 @@ Route::middleware('auth')->group(function () {
     Route::delete('/my-projects/{project}', [MyProjectController::class, 'destroy'])->name('my-projects.destroy');
     Route::get('/tasks/{task}/download-resources', [MyProjectController::class, 'downloadResources'])->name('tasks.download-resources');
     Route::post('/tasks/{task}/submit', [SubmissionController::class, 'store'])->name('tasks.submit');
+    Route::delete('/submissions/{submission}', [SubmissionController::class, 'destroy'])->name('submissions.destroy');
 });

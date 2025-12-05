@@ -2,10 +2,10 @@
 
 SimuLearn is an intelligent, personalized learning platform designed to bridge the gap between academic theory and industry application. It functions as a **Virtual Industry Simulator**, using AI to act as a "Senior Project Manager" that guides students through realistic software development lifecycles.
 
-## 🚧 Project Status: Under Development
+## 🚧 Project Status: Active Development
 
-**Overall Progress:** 60%
-`████████████████████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░`
+**Overall Progress:** 85%
+`███████████████████████████████████████████████████████████████████████████████████████░░░░░░░░░░░░░░░`
 
 > **Note:** This is the **MVP (Minimum Viable Product)** version. All features listed below are part of the initial development phase and will be enhanced in future updates.
 
@@ -47,11 +47,15 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
     -   [x] **State Management**: Handling "Pending Review" states to prevent auto-completion before grading.
     -   [x] **Submission Management**: Ability to remove/replace files before final grading.
 
-#### **Phase 4: Evaluation & Feedback Loop** (🚧 In Progress)
+#### **Phase 4: Evaluation & Feedback Loop** (✅ Completed)
 
--   [ ] **AI Grading Engine**: Automated analysis of user submissions using LLMs.
--   [ ] **Performance Scoring**: XP/Points calculation based on code quality and efficiency.
--   [ ] **Feedback Engine**: Generating constructive, specific feedback for improvements.
+-   [x] **AI Grading Engine**: Automated analysis of user submissions using Google Gemini 2.0 Flash.
+    -   **ZIP Extraction**: Automatically extracts and scans user code.
+    -   **Rubric-Based Scoring**: Evaluates code on Functionality, Code Quality, Best Practices, and Error Handling.
+-   [x] **Immediate Feedback**: Users receive instant scores (0-100) and detailed, constructive feedback.
+-   [x] **Resubmission Logic**:
+    -   **Fail State (<60)**: Users must improve and resubmit to proceed.
+    -   **Pass State (>=60)**: Users can choose to "Improve Score" or proceed to the next task.
 -   [ ] **Gamification**: Badges and achievements for milestones.
 -   [ ] **Career Analytics**: Charts showing skill growth over time.
 
@@ -89,9 +93,9 @@ Unlike traditional e-learning platforms that deliver static content, SimuLearn d
 
 ## 🛠 Tech Stack
 
--   **Frontend:** React (via Inertia.js), Tailwind CSS, React Flow, Zustand
+-   **Frontend:** React (via Inertia.js), Tailwind CSS, Headless UI
 -   **Backend:** Laravel 10.x, MySQL
--   **AI Integration:** (Planned) OpenAI/Gemini API for code evaluation
+-   **AI Integration:** Google Gemini API (gemini-2.0-flash) for code evaluation and profile analysis
 
 ## 📦 Installation
 
