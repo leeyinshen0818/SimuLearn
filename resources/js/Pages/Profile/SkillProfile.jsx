@@ -87,65 +87,64 @@ const SkillProfile = ({ auth, skills, userSkills, userBio, userBioSummary }) => 
     const categories = ['All', ...Object.keys(skills)];
 
     return (
-        <div className="h-screen bg-slate-50 flex overflow-hidden font-sans">
+        <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
             <Head title="Skill Profile" />
 
             {/* Sidebar */}
-            <div className="w-72 bg-white border-r border-slate-200 flex flex-col shrink-0 z-20">
-                <div className="h-16 flex items-center px-8 border-b border-slate-100">
-                    <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0 z-20">
+                <div className="h-16 flex items-center px-6 border-b border-gray-200">
+                    <Link href="/" className="flex items-center gap-2 group">
                         <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-indigo-200 shadow-md group-hover:scale-105 transition-transform">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
-                        <span className="text-xl font-bold text-slate-900 tracking-tight">SimuLearn</span>
+                        <span className="text-xl font-bold text-gray-900 tracking-tight">SimuLearn</span>
                     </Link>
                 </div>
 
-                <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-                    <Link href="/dashboard" className="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 group transition-all">
-                        <svg className="w-5 h-5 mr-3 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+                    <Link href="/dashboard" className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-gray-900 group transition-colors">
+                        <svg className="w-5 h-5 mr-3 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                         </svg>
                         Dashboard
                     </Link>
-                    <Link href="/my-projects" className="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 group transition-all">
-                        <svg className="w-5 h-5 mr-3 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <Link href="/my-projects" className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-gray-900 group transition-colors">
+                        <svg className="w-5 h-5 mr-3 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                         My Projects
                     </Link>
-                    <Link href="/profile/skills" className="flex items-center px-4 py-3 text-sm font-medium text-slate-900 bg-white border border-slate-200 shadow-sm rounded-lg group relative overflow-hidden">
-                        <div className="absolute inset-y-0 left-0 w-1 bg-indigo-600 rounded-l-lg"></div>
-                        <svg className="w-5 h-5 mr-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <Link href="/profile/skills" className="flex items-center px-4 py-3 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg group">
+                        <svg className="w-5 h-5 mr-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Skill Profile
                     </Link>
-                    <a href="#" className="flex items-center px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 group transition-all">
-                        <svg className="w-5 h-5 mr-3 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <Link href="/career-path" className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-50 hover:text-gray-900 group transition-colors">
+                        <svg className="w-5 h-5 mr-3 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                         Career Path
-                    </a>
+                    </Link>
                 </nav>
 
-                <div className="p-4 border-t border-slate-200">
+                <div className="p-4 border-t border-gray-200">
                     <div className="flex items-center gap-3 mb-4 px-2">
-                        <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold shadow-sm">
-                            {auth.user.name.charAt(0)}
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                            {auth.user?.name ? auth.user.name.charAt(0) : 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 truncate">{auth.user.name}</p>
-                            <p className="text-xs text-slate-500 truncate">{auth.user.email}</p>
+                            <p className="text-sm font-semibold text-gray-900 truncate">{auth.user?.name || 'User'}</p>
+                            <p className="text-xs text-gray-500 truncate">{auth.user?.email || 'email@example.com'}</p>
                         </div>
                     </div>
                     <Link
                         href="/logout"
                         method="post"
                         as="button"
-                        className="w-full flex items-center justify-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
                     >
                         Log Out
                     </Link>
@@ -211,7 +210,7 @@ const SkillProfile = ({ auth, skills, userSkills, userBio, userBioSummary }) => 
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-8 bg-gray-50/50">
+                <main className="flex-1 overflow-y-auto px-6 py-8 bg-gray-50">
                     <div className="max-w-6xl mx-auto">
                         {currentStep === 3 && (
                             <div className="max-w-6xl mx-auto animate-fade-in space-y-8">

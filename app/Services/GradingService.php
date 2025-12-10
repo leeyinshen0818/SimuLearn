@@ -38,13 +38,15 @@ class GradingService
             $task = $submission->userTask->task;
             $prompt = $this->constructPrompt($task, $codeContent);
 
-            // 5. Call AI
+            // 5. Call AI (DISABLED FOR DEVELOPMENT)
+            /*
             $apiKey = env('GEMINI_API_KEY');
             if (!$apiKey) {
                 throw new \Exception("GEMINI_API_KEY is not configured.");
             }
 
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}", [
+            // Using gemini-pro for maximum compatibility and stability
+            $response = Http::retry(3, 2000)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
@@ -62,22 +64,29 @@ class GradingService
             $responseData = $response->json();
             $aiText = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
-            // Clean up JSON markdown if present
-            $aiText = str_replace(['```json', '```'], '', $aiText);
-            // Trim whitespace to ensure valid JSON parsing
-            $aiText = trim($aiText);
+            // Extract JSON using regex to handle potential markdown or preamble
+            if (preg_match('/\{[\s\S]*\}/', $aiText, $matches)) {
+                $jsonString = $matches[0];
+            } else {
+                $jsonString = $aiText;
+            }
 
-            $result = json_decode($aiText, true);
+            $result = json_decode($jsonString, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 // Fallback if JSON parsing fails
                 Log::warning("AI Grading JSON Parse Error. Raw output: " . $aiText);
                 $score = 70; // Default fallback
-                $feedback = $aiText;
+                $feedback = $aiText; // Use the raw text as feedback if it's not JSON
             } else {
                 $score = $result['score'] ?? 0;
                 $feedback = $result['feedback'] ?? "No feedback provided.";
             }
+            */
+
+            // MOCK RESULT
+            $score = 85;
+            $feedback = "AI Grading is temporarily disabled for development.\n\n**Mock Feedback:**\n- The submission was received successfully.\n- Code structure appears valid.\n- This is a placeholder result to allow workflow testing.";
 
             // 6. Update Submission
             $submission->update([

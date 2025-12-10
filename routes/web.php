@@ -91,6 +91,9 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile/skills', [SkillController::class, 'create'])->name('profile.skills');
     Route::post('/profile/skills', [SkillController::class, 'store'])->name('profile.skills.store');
+    Route::get('/career-path', function () {
+        return Inertia::render('CareerPath');
+    })->name('career-path');
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/project/{project}', [ProjectController::class, 'show'])->name('project.show');
     Route::post('/projects/{project}/start', [MyProjectController::class, 'store'])->name('projects.start');

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTask }) => {
+const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTask, flash }) => {
 
     const [displayedTask, setDisplayedTask] = React.useState(currentTask);
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
@@ -14,6 +14,26 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
     React.useEffect(() => {
         setDisplayedTask(currentTask);
     }, [currentTask]);
+
+    const switchTask = (direction) => {
+        if (!activeProject || !activeProject.tasks || !displayedTask) return;
+        const tasks = activeProject.tasks;
+        const currentIndex = tasks.findIndex((t) => t.id === displayedTask.id);
+        if (currentIndex === -1) return;
+        const nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+        if (nextIndex < 0 || nextIndex >= tasks.length) return;
+        setDisplayedTask(tasks[nextIndex]);
+    };
+
+    const goToAdjacentTask = (direction) => {
+        if (!activeProject || !activeProject.tasks || !displayedTask) return;
+        const idx = activeProject.tasks.findIndex((t) => t.id === displayedTask.id);
+        if (idx === -1) return;
+        const nextIdx = idx + direction;
+        if (nextIdx < 0 || nextIdx >= activeProject.tasks.length) return;
+        setDisplayedTask(activeProject.tasks[nextIdx]);
+    };
+
 
     const submitSolution = (e) => {
         e.preventDefault();
@@ -47,7 +67,7 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
             <Head title="My Simulation" />
 
             <nav className="bg-white border-b border-gray-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="w-full px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <Link href="/dashboard" className="flex items-center text-gray-500 hover:text-gray-700">
@@ -68,11 +88,30 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                 </div>
             </nav>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col lg:flex-row gap-8">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+                {flash.success && (
+                    <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">Success! </strong>
+                        <span className="block sm:inline">{flash.success}</span>
+                    </div>
+                )}
+                {flash.error && (
+                    <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">Error! </strong>
+                        <span className="block sm:inline">{flash.error}</span>
+                    </div>
+                )}
+                {flash.warning && (
+                    <div className="mb-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">Warning! </strong>
+                        <span className="block sm:inline">{flash.warning}</span>
+                    </div>
+                )}
+
+                <div className="flex flex-col lg:flex-row gap-6">
 
                     {/* Sidebar: Project Switcher */}
-                    <div className="w-full lg:w-1/4">
+                    <div className="w-full lg:w-72 flex-shrink-0">
                         <div className="bg-white shadow rounded-lg overflow-hidden">
                             <div className="px-4 py-5 border-b border-gray-200 bg-gray-50">
                                 <h3 className="text-lg font-medium text-gray-900">My Projects</h3>
@@ -123,41 +162,92 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                     </div>
 
                     {/* Main Content: Active Simulation */}
-                    <div className="w-full lg:w-3/4 space-y-6">
+                    <div className="flex-1 min-w-0 space-y-6">
 
                         {activeProject ? (
                             <>
                                 {/* Project Header */}
-                                <div className="bg-white shadow rounded-lg p-6">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h2 className="text-2xl font-bold text-gray-900">{activeProject.title}</h2>
-                                            <p className="mt-1 text-gray-500">{activeProject.description}</p>
+                                <div className="bg-white shadow rounded-lg p-6 border border-indigo-50">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold shadow-sm border border-indigo-100">
+                                                {activeProject.title.substring(0, 2).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <h2 className="text-2xl font-bold text-gray-900">{activeProject.title}</h2>
+                                                <p className="mt-1 text-gray-600 text-sm leading-relaxed max-w-2xl">{activeProject.description}</p>
+                                            </div>
                                         </div>
-                                        <div className="text-right">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                                In Progress
-                                            </span>
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-right">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                                    In Progress
+                                                </span>
+                                            </div>
+                                            <div className="hidden md:block text-xs text-gray-500">
+                                                {activeProject.tasks?.length || 0} tasks
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
+                                {/* Task Tabs removed per request */}
+
                                 {/* Current Task Workspace */}
                                 {displayedTask ? (
                                     <div className="bg-white shadow rounded-lg overflow-hidden border border-indigo-100">
-                                        <div className="bg-indigo-600 px-6 py-4 flex justify-between items-center">
-                                            <h3 className="text-lg font-medium text-white flex items-center">
-                                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                                </svg>
-                                                {displayedTask.id === currentTask?.id ? 'Current Task: ' : 'Viewing Task: '} {displayedTask.title}
-                                            </h3>
-                                            <span className="text-indigo-100 text-sm bg-indigo-700 px-2 py-1 rounded">
-                                                Step {(activeProject.tasks?.findIndex(t => t.id === displayedTask.id) ?? -1) + 1} of {activeProject.tasks?.length || 0}
-                                            </span>
+                                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                            <div>
+                                                <p className="text-xs uppercase tracking-[0.15em] text-indigo-100 font-semibold">{displayedTask.id === currentTask?.id ? 'Current Task' : 'Task Preview'}</p>
+                                                <h3 className="text-xl font-semibold text-white flex items-center gap-2 mt-1">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                    </svg>
+                                                    {displayedTask.title}
+                                                </h3>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white border border-white/30">
+                                                    Step {(activeProject.tasks?.findIndex(t => t.id === displayedTask.id) ?? -1) + 1} of {activeProject.tasks?.length || 0}
+                                                </span>
+                                                {(() => {
+                                                    const userTask = displayedTask.user_tasks && displayedTask.user_tasks[0];
+                                                    const submissions = userTask ? userTask.submissions : [];
+                                                    const latestSubmission = submissions.length > 0 ? submissions[submissions.length - 1] : null;
+                                                    const isPending = latestSubmission && latestSubmission.status === 'pending';
+                                                    const isCompleted = userTask && userTask.status === 'completed';
+                                                    const isGraded = latestSubmission && latestSubmission.status === 'graded';
+                                                    if (isPending) return <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">Pending Review</span>;
+                                                    if (isCompleted) return <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">Completed</span>;
+                                                    if (isGraded) return <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">Graded</span>;
+                                                    return <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/15 text-white border border-white/30">Not Submitted</span>;
+                                                })()}
+                                                <div className="flex items-center gap-2 ml-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => switchTask('prev')}
+                                                        className="inline-flex items-center justify-center h-9 px-3 rounded-full border border-white/30 text-white bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                        disabled={!activeProject?.tasks || (activeProject.tasks.findIndex(t => t.id === displayedTask.id) ?? 0) <= 0}
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                                        </svg>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => switchTask('next')}
+                                                        className="inline-flex items-center justify-center h-9 px-3 rounded-full border border-white/30 text-white bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                        disabled={!activeProject?.tasks || (activeProject.tasks.findIndex(t => t.id === displayedTask.id) ?? activeProject.tasks.length - 1) >= activeProject.tasks.length - 1}
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div className="p-6 space-y-6">
+                                        <div className="p-6 space-y-6 bg-white">
                                             {/* Scenario Section */}
                                             {displayedTask.scenario && (
                                                 <div className="bg-blue-50 border-l-4 border-blue-400 p-4">

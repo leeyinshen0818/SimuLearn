@@ -95,7 +95,9 @@ class SkillController extends Controller
                 }
                 $prompt .= "\nBased on this, list 3-5 key technical capabilities and potential roles for this developer. Format the output as a concise bulleted list (using •). Do not include introductory text.";
 
-                $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}", [
+                // Using gemini-pro for maximum compatibility and stability
+                /*
+                $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
                     'contents' => [
                         [
                             'parts' => [
@@ -114,6 +116,10 @@ class SkillController extends Controller
                 } else {
                     Log::error('Gemini API Error: ' . $response->body());
                 }
+                */
+
+                // MOCK RESULT
+                $bioSummary = "• Full Stack Development capabilities\n• Strong proficiency in PHP and JavaScript\n• Experience with Laravel and React ecosystems\n• Potential roles: Full Stack Developer, Backend Engineer";
             } catch (\Exception $e) {
                 Log::error('Gemini Exception: ' . $e->getMessage());
             }

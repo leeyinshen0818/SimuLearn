@@ -9,6 +9,12 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 
 > **Note:** This is the **MVP (Minimum Viable Product)** version. All features listed below are part of the initial development phase and will be enhanced in future updates.
 
+### 🔎 Current UX highlights
+
+-   Dashboard, Skill Profile, and Career Path now share a consistent shell (sidebar + header) for smoother navigation.
+-   Career Path is available at `/career-path` with mock insights (AI temporarily paused).
+-   Skill Profile wizard retains the full multi-step flow with the updated layout.
+
 ### 📅 Detailed Roadmap
 
 #### **Phase 0: Foundation & Setup** (✅ Completed)
@@ -95,7 +101,7 @@ Unlike traditional e-learning platforms that deliver static content, SimuLearn d
 
 -   **Frontend:** React (via Inertia.js), Tailwind CSS, Headless UI
 -   **Backend:** Laravel 10.x, MySQL
--   **AI Integration:** Google Gemini API (gemini-2.0-flash) for code evaluation and profile analysis
+-   **AI Integration:** Google Gemini API (gemini-2.0-flash) for code evaluation and profile analysis _(currently mocked/paused in UI)_
 
 ## 📦 Installation
 

@@ -56,9 +56,10 @@ class SubmissionController extends Controller
                     return back()->with('warning', "Solution graded. Score: {$result['score']}. Please review feedback and try again.");
                 }
 
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // If grading fails, keep it as pending
-                return back()->with('success', 'Solution submitted! Grading is processing in background.');
+                // For debugging: showing the actual error
+                return back()->with('error', 'Grading failed: ' . $e->getMessage());
             }
         }
 
