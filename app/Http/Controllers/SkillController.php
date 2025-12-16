@@ -76,75 +76,11 @@ class SkillController extends Controller
         $bioSummary = null;
 
         Log::info('SkillController: Processing profile update. Bio provided: ' . ($bio ? 'Yes' : 'No'));
-        Log::info('Gemini Key configured: ' . (env('GEMINI_API_KEY') ? 'Yes' : 'No'));
+        Log::info('AI calls disabled: using mock bio summary');
 
-        // Try Gemini first if key exists
-        if ((!empty($selectedSkillIds) || $bio) && env('GEMINI_API_KEY')) {
-            try {
-                $apiKey = env('GEMINI_API_KEY');
-                Log::info('SkillController: Calling Gemini API for Analysis');
-
-                // Get skill names
-                $skillNames = Skill::whereIn('id', $selectedSkillIds)->pluck('name')->toArray();
-                $skillsString = implode(', ', $skillNames);
-
-                $prompt = "You are a technical career analyst. Analyze the following developer profile:\n\n";
-                $prompt .= "Skills: " . $skillsString . "\n";
-                if ($bio) {
-                    $prompt .= "Bio: " . $bio . "\n";
-                }
-                $prompt .= "\nBased on this, list 3-5 key technical capabilities and potential roles for this developer. Format the output as a concise bulleted list (using •). Do not include introductory text.";
-
-                // Using gemini-pro for maximum compatibility and stability
-                /*
-                $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => $prompt]
-                            ]
-                        ]
-                    ]
-                ]);
-
-                Log::info('Gemini API Response Status: ' . $response->status());
-
-                if ($response->successful()) {
-                    // Gemini response structure: candidates[0].content.parts[0].text
-                    $bioSummary = $response->json('candidates.0.content.parts.0.text');
-                    Log::info('Gemini Summary generated successfully');
-                } else {
-                    Log::error('Gemini API Error: ' . $response->body());
-                }
-                */
-
-                // MOCK RESULT
-                $bioSummary = "• Full Stack Development capabilities\n• Strong proficiency in PHP and JavaScript\n• Experience with Laravel and React ecosystems\n• Potential roles: Full Stack Developer, Backend Engineer";
-            } catch (\Exception $e) {
-                Log::error('Gemini Exception: ' . $e->getMessage());
-            }
-        }
-        // Fallback to OpenAI if Gemini is not configured but OpenAI is
-        else if ($bio && env('OPENAI_API_KEY')) {
-            try {
-                $response = Http::withToken(env('OPENAI_API_KEY'))
-                    ->post('https://api.openai.com/v1/chat/completions', [
-                        'model' => 'gpt-3.5-turbo',
-                        'messages' => [
-                            ['role' => 'system', 'content' => 'You are a professional career consultant. Summarize the following professional bio into a concise, formal summary suitable for a developer profile (max 3 sentences).'],
-                            ['role' => 'user', 'content' => $bio],
-                        ],
-                        'max_tokens' => 150,
-                    ]);
-
-                if ($response->successful()) {
-                    $bioSummary = $response->json('choices.0.message.content');
-                } else {
-                    Log::error('OpenAI API Error: ' . $response->body());
-                }
-            } catch (\Exception $e) {
-                Log::error('OpenAI Exception: ' . $e->getMessage());
-            }
+        // AI temporarily disabled: always use mock summary to avoid token usage
+        if (!empty($selectedSkillIds) || $bio) {
+            $bioSummary = "• Full Stack Development capabilities\n• Strong proficiency in PHP and JavaScript\n• Experience with Laravel and React ecosystems\n• Potential roles: Full Stack Developer, Backend Engineer\n• AI summarization currently mocked (Gemini disabled)";
         }
 
         $user->skills()->sync($selectedSkillIds);

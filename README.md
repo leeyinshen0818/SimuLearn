@@ -14,6 +14,8 @@ SimuLearn is an intelligent, personalized learning platform designed to bridge t
 -   Dashboard, Skill Profile, and Career Path now share a consistent shell (sidebar + header) for smoother navigation.
 -   Career Path is available at `/career-path` with mock insights (AI temporarily paused).
 -   Skill Profile wizard retains the full multi-step flow with the updated layout.
+-   Project Library refresh: cards redesigned with clearer skill chips and task counts, simplified filters (difficulty + recommended), and smarter sorting (best skill match → harder projects → more tasks).
+-   AI-powered grading and career insights are currently mocked in the UI; no live calls are made during the MVP phase.
 
 ### 📅 Detailed Roadmap
 
