@@ -7,6 +7,7 @@
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4.1.17",
+        "@tailwindcss/typography": "^0.5.19",
         "@vitejs/plugin-react": "^5.1.1",
         "autoprefixer": "^10.4.22",
         "axios": "^1.6.4",
@@ -20,8 +21,11 @@
     "dependencies": {
         "@inertiajs/react": "^2.2.18",
         "dagre": "^0.8.5",
+        "dompurify": "^3.3.1",
         "lucide-react": "^0.556.0",
+        "marked": "^17.0.1",
         "reactflow": "^11.11.4",
+        "recharts": "^3.6.0",
         "zustand": "^5.0.8"
     }
 }

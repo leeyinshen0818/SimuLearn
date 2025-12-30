@@ -79,12 +79,72 @@ Route::get('/dashboard', function () {
     $completedTasksCount = $user->tasks()->where('status', 'completed')->count();
     $skillsCount = $user->skills()->count();
 
+    // --- Chart Data Preparation ---
+
+    // 1. Score Trend (Last 10 graded submissions)
+    $scoreTrend = \App\Models\Submission::whereHas('userTask', function ($q) use ($user) {
+        $q->where('user_id', $user->id);
+    })
+    ->where('status', 'graded')
+    ->orderBy('created_at', 'asc') // Oldest to newest for the chart
+    ->take(10) // Limit to last 10 (actually we want last 10 by date, so maybe take(10) after sorting desc then reverse? Let's just get latest 10 and reverse)
+    ->get()
+    ->map(function ($submission) {
+        return [
+            'date' => $submission->created_at->format('M d'),
+            'score' => $submission->score,
+            'task' => $submission->userTask->task->title ?? 'Task',
+        ];
+    });
+    // If we used orderBy asc on the whole table, we get the OLDEST 10. We want the NEWEST 10, then sorted chronologically.
+    $scoreTrend = \App\Models\Submission::whereHas('userTask', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+        ->where('status', 'graded')
+        ->latest()
+        ->take(10)
+        ->with('userTask.task')
+        ->get()
+        ->reverse() // Make it chronological
+        ->values()
+        ->map(function ($submission) {
+            return [
+                'date' => $submission->created_at->format('M d'),
+                'score' => $submission->score,
+                'task' => $submission->userTask->task->title ?? 'Task',
+            ];
+        });
+
+    // 2. Weekly Activity (Submissions per day for last 7 days)
+    $endDate = now();
+    $startDate = now()->subDays(6);
+    $activityData = \App\Models\Submission::whereHas('userTask', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+        ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+        ->get()
+        ->groupBy(function ($date) {
+            return $date->created_at->format('D'); // Mon, Tue, etc.
+        });
+
+    $weeklyActivity = [];
+    $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
+    foreach ($period as $date) {
+        $dayName = $date->format('D');
+        $weeklyActivity[] = [
+            'day' => $dayName,
+            'count' => isset($activityData[$dayName]) ? $activityData[$dayName]->count() : 0,
+        ];
+    }
+
     return Inertia::render('Dashboard', [
         'profileCompleted' => $hasSkills || $hasBio,
         'recommendedProjects' => $recommendedProjects,
         'enrolledProjectsCount' => $enrolledProjectsCount,
         'completedTasksCount' => $completedTasksCount,
         'skillsCount' => $skillsCount,
+        'scoreTrend' => $scoreTrend,
+        'weeklyActivity' => $weeklyActivity,
     ]);
 })->middleware('auth')->name('dashboard');
 

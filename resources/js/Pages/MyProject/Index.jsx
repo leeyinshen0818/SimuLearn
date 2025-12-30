@@ -393,6 +393,19 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
 
                                                     if (latestSubmission && latestSubmission.status === 'graded') {
                                                         const isPassing = latestSubmission.score >= 60;
+
+                                                        const tasks = (activeProject && activeProject.tasks) ? activeProject.tasks : [];
+                                                        const currentIndex = tasks.findIndex((t) => t.id === displayedTask.id);
+                                                        const nextTask = currentIndex >= 0 && currentIndex + 1 < tasks.length ? tasks[currentIndex + 1] : null;
+
+                                                        const nextTaskHref = (activeProject && nextTask)
+                                                            ? `/my-projects?project_id=${activeProject.id}&task_id=${nextTask.id}`
+                                                            : null;
+
+                                                        const retryHref = activeProject
+                                                            ? `/my-projects?project_id=${activeProject.id}&task_id=${displayedTask.id}`
+                                                            : '/my-projects';
+
                                                         return (
                                                             <div className={`mt-6 border-t pt-6 ${isPassing ? 'border-green-100' : 'border-red-100'}`}>
                                                                 <div className={`rounded-lg p-6 ${isPassing ? 'bg-green-50' : 'bg-red-50'}`}>
@@ -421,13 +434,24 @@ const MyProjectIndex = ({ auth, enrolledProjects = [], activeProject, currentTas
                                                                         </div>
                                                                     )}
 
-                                                                    <div className="mt-6 flex justify-end">
+                                                                    <div className="mt-6 flex justify-end gap-3">
                                                                         <button
-                                                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                                            type="button"
+                                                                            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                                                             onClick={() => setShowSubmissionModal(true)}
                                                                         >
-                                                                            {isPassing ? 'Improve Score' : 'Re-attempt'}
+                                                                            Retry
                                                                         </button>
+
+                                                                        {isPassing && nextTaskHref && (
+                                                                            <Link
+                                                                                href={nextTaskHref}
+                                                                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                                                preserveScroll
+                                                                            >
+                                                                                Next Task
+                                                                            </Link>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                             </div>

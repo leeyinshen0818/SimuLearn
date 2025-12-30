@@ -23,6 +23,7 @@ class MyProjectController extends Controller
 
         // Determine the active project
         $activeProjectId = $request->query('project_id');
+        $requestedTaskId = $request->query('task_id');
         $activeProject = null;
         $currentTask = null;
 
@@ -94,10 +95,17 @@ class MyProjectController extends Controller
 
             $activeProject->setRelation('tasks', $filteredTasks->values());
 
-            // Determine the current task (first non-completed task from the filtered list)
-            $currentTask = $filteredTasks->first(function ($task) use ($completedTaskIds) {
-                return !in_array($task->id, $completedTaskIds);
-            });
+            // If a specific task is requested (e.g., right after grading), keep the user on it
+            if ($requestedTaskId) {
+                $currentTask = $filteredTasks->firstWhere('id', (int) $requestedTaskId);
+            }
+
+            // Otherwise, determine the current task (first non-completed task from the filtered list)
+            if (!$currentTask) {
+                $currentTask = $filteredTasks->first(function ($task) use ($completedTaskIds) {
+                    return !in_array($task->id, $completedTaskIds);
+                });
+            }
 
             // If no current task found (all completed?), maybe show the last one or a summary
             if (!$currentTask) {

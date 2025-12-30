@@ -25,6 +25,9 @@ class SubmissionController extends Controller
             ->where('task_id', $taskId)
             ->firstOrFail();
 
+        $userTask->loadMissing('task');
+        $projectId = $userTask->task?->project_id;
+
         // Handle File Upload
         if ($request->hasFile('file')) {
             $file = $request->file('file');
@@ -51,15 +54,21 @@ class SubmissionController extends Controller
                         'status' => 'completed',
                         'completed_at' => now(),
                     ]);
-                    return back()->with('success', "Solution graded! Score: {$result['score']}. Task Completed!");
+                    return redirect()
+                        ->route('my-projects.index', ['project_id' => $projectId, 'task_id' => $taskId])
+                        ->with('success', "Solution graded! Score: {$result['score']}. Task Completed!");
                 } else {
-                    return back()->with('warning', "Solution graded. Score: {$result['score']}. Please review feedback and try again.");
+                    return redirect()
+                        ->route('my-projects.index', ['project_id' => $projectId, 'task_id' => $taskId])
+                        ->with('warning', "Solution graded. Score: {$result['score']}. Please review feedback and try again.");
                 }
 
             } catch (\Throwable $e) {
                 // If grading fails, keep it as pending
                 // For debugging: showing the actual error
-                return back()->with('error', 'Grading failed: ' . $e->getMessage());
+                return redirect()
+                    ->route('my-projects.index', ['project_id' => $projectId, 'task_id' => $taskId])
+                    ->with('error', 'Grading failed: ' . $e->getMessage());
             }
         }
 

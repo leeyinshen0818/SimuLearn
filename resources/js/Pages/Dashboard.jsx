@@ -1,7 +1,105 @@
 import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 
-const Dashboard = ({ auth, profileCompleted, recommendedProjects = [], enrolledProjectsCount = 0, completedTasksCount = 0, skillsCount = 0 }) => {
+// Simple SVG Line Chart Component
+const SimpleLineChart = ({ data, height = 200 }) => {
+    if (!data || data.length === 0) return null;
+
+    const padding = 20;
+    const width = 600; // viewBox width
+    const effectiveHeight = height - padding * 2;
+    const effectiveWidth = width - padding * 2;
+
+    const maxScore = 100;
+
+    const points = data.map((d, i) => {
+        const x = padding + (i / (data.length - 1)) * effectiveWidth;
+        const y = height - padding - (d.score / maxScore) * effectiveHeight;
+        return `${x},${y}`;
+    }).join(' ');
+
+    return (
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+            {/* Grid lines */}
+            {[0, 25, 50, 75, 100].map(val => {
+                const y = height - padding - (val / maxScore) * effectiveHeight;
+                return (
+                    <g key={val}>
+                        <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="#e5e7eb" strokeWidth="1" />
+                        <text x={padding - 5} y={y + 4} textAnchor="end" fontSize="10" fill="#9ca3af">{val}</text>
+                    </g>
+                );
+            })}
+
+            {/* Line */}
+            <polyline points={points} fill="none" stroke="#4f46e5" strokeWidth="2" />
+
+            {/* Dots */}
+            {data.map((d, i) => {
+                const x = padding + (i / (data.length - 1)) * effectiveWidth;
+                const y = height - padding - (d.score / maxScore) * effectiveHeight;
+                return (
+                    <g key={i} className="group">
+                        <circle cx={x} cy={y} r="4" fill="#4f46e5" />
+                        {/* Tooltip-ish */}
+                        <g className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <rect x={x - 20} y={y - 25} width="40" height="20" rx="4" fill="#1f2937" />
+                            <text x={x} y={y - 11} textAnchor="middle" fontSize="10" fill="white">{d.score}</text>
+                        </g>
+                        <text x={x} y={height - 5} textAnchor="middle" fontSize="10" fill="#6b7280">{d.date}</text>
+                    </g>
+                );
+            })}
+        </svg>
+    );
+};
+
+// Simple SVG Bar Chart Component
+const SimpleBarChart = ({ data, height = 200 }) => {
+    if (!data || data.length === 0) return null;
+
+    const padding = 20;
+    const width = 600;
+    const effectiveHeight = height - padding * 2;
+    const effectiveWidth = width - padding * 2;
+
+    const maxCount = Math.max(...data.map(d => d.count), 5); // Min max of 5
+    const barWidth = (effectiveWidth / data.length) * 0.6;
+
+    return (
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+             {/* Grid lines */}
+             {[0, Math.ceil(maxCount/2), maxCount].map(val => {
+                const y = height - padding - (val / maxCount) * effectiveHeight;
+                return (
+                    <g key={val}>
+                        <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="#e5e7eb" strokeWidth="1" />
+                        <text x={padding - 5} y={y + 4} textAnchor="end" fontSize="10" fill="#9ca3af">{val}</text>
+                    </g>
+                );
+            })}
+
+            {data.map((d, i) => {
+                const x = padding + (i * (effectiveWidth / data.length)) + (effectiveWidth / data.length - barWidth) / 2;
+                const barHeight = (d.count / maxCount) * effectiveHeight;
+                const y = height - padding - barHeight;
+
+                return (
+                    <g key={i} className="group">
+                        <rect x={x} y={y} width={barWidth} height={barHeight} fill="#8b5cf6" rx="2" />
+                        <text x={x + barWidth/2} y={height - 5} textAnchor="middle" fontSize="10" fill="#6b7280">{d.day}</text>
+                        {/* Tooltip */}
+                        <g className="opacity-0 group-hover:opacity-100 transition-opacity">
+                             <text x={x + barWidth/2} y={y - 5} textAnchor="middle" fontSize="10" fill="#4b5563">{d.count}</text>
+                        </g>
+                    </g>
+                );
+            })}
+        </svg>
+    );
+};
+
+const Dashboard = ({ auth, profileCompleted, recommendedProjects = [], enrolledProjectsCount = 0, completedTasksCount = 0, skillsCount = 0, scoreTrend = [], weeklyActivity = [] }) => {
     const { user } = auth;
 
     return (
@@ -159,6 +257,37 @@ const Dashboard = ({ auth, profileCompleted, recommendedProjects = [], enrolledP
                                         </dl>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Performance Analytics */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        {/* Score Trend Chart */}
+                        <div className="bg-white shadow rounded-lg p-6">
+                            <h3 className="text-lg font-medium text-gray-900 mb-4">Score Trend (Last 10 Submissions)</h3>
+                            <div className="h-64">
+                                {scoreTrend.length > 0 ? (
+                                    <SimpleLineChart data={scoreTrend} height={250} />
+                                ) : (
+                                    <div className="h-full flex items-center justify-center text-gray-400 text-sm">
+                                        No graded submissions yet.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Weekly Activity Chart */}
+                        <div className="bg-white shadow rounded-lg p-6">
+                            <h3 className="text-lg font-medium text-gray-900 mb-4">Weekly Activity</h3>
+                            <div className="h-64">
+                                {weeklyActivity.length > 0 ? (
+                                    <SimpleBarChart data={weeklyActivity} height={250} />
+                                ) : (
+                                    <div className="h-full flex items-center justify-center text-gray-400 text-sm">
+                                        No activity recorded this week.
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
