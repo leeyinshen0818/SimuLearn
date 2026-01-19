@@ -85,21 +85,21 @@ Route::get('/dashboard', function () {
     $scoreTrend = \App\Models\Submission::whereHas('userTask', function ($q) use ($user) {
         $q->where('user_id', $user->id);
     })
-    ->where('status', 'graded')
-    ->orderBy('created_at', 'asc') // Oldest to newest for the chart
-    ->take(10) // Limit to last 10 (actually we want last 10 by date, so maybe take(10) after sorting desc then reverse? Let's just get latest 10 and reverse)
-    ->get()
-    ->map(function ($submission) {
-        return [
-            'date' => $submission->created_at->format('M d'),
-            'score' => $submission->score,
-            'task' => $submission->userTask->task->title ?? 'Task',
-        ];
-    });
+        ->where('status', 'graded')
+        ->orderBy('created_at', 'asc') // Oldest to newest for the chart
+        ->take(10) // Limit to last 10 (actually we want last 10 by date, so maybe take(10) after sorting desc then reverse? Let's just get latest 10 and reverse)
+        ->get()
+        ->map(function ($submission) {
+            return [
+                'date' => $submission->created_at->format('M d'),
+                'score' => $submission->score,
+                'task' => $submission->userTask->task->title ?? 'Task',
+            ];
+        });
     // If we used orderBy asc on the whole table, we get the OLDEST 10. We want the NEWEST 10, then sorted chronologically.
     $scoreTrend = \App\Models\Submission::whereHas('userTask', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })
+        $q->where('user_id', $user->id);
+    })
         ->where('status', 'graded')
         ->latest()
         ->take(10)
@@ -119,8 +119,8 @@ Route::get('/dashboard', function () {
     $endDate = now();
     $startDate = now()->subDays(6);
     $activityData = \App\Models\Submission::whereHas('userTask', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })
+        $q->where('user_id', $user->id);
+    })
         ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
         ->get()
         ->groupBy(function ($date) {
