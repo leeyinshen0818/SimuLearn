@@ -73,20 +73,13 @@ class SkillController extends Controller
             }
         }
 
-        $bioSummary = null;
-
-        Log::info('SkillController: Processing profile update. Bio provided: ' . ($bio ? 'Yes' : 'No'));
-        Log::info('AI calls disabled: using mock bio summary');
-
-        // AI temporarily disabled: always use mock summary to avoid token usage
-        if (!empty($selectedSkillIds) || $bio) {
-            $bioSummary = "• Full Stack Development capabilities\n• Strong proficiency in PHP and JavaScript\n• Experience with Laravel and React ecosystems\n• Potential roles: Full Stack Developer, Backend Engineer\n• AI summarization currently mocked (Gemini disabled)";
-        }
+        // Use static summary as requested, skipping AI analysis for the profile
+        $bioSummary = "Your skill profile is complete. You are ready to explore the simulation.";
 
         $user->skills()->sync($selectedSkillIds);
         $user->update([
             'bio' => $bio,
-            'bio_summary' => $bioSummary ?? $user->bio_summary // Keep old summary if new one fails or bio is empty
+            'bio_summary' => $bioSummary
         ]);
 
         return redirect()->route('profile.skills')->with('success', 'Skill profile updated successfully!');

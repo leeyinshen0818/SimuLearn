@@ -276,54 +276,87 @@ const SkillProfile = ({ auth, skills, userSkills, userBio, userBioSummary }) => 
                                             </div>
                                         </div>
 
-                                        {/* AI Analysis Section */}
+                                        {/* AI Analysis / Confirmation Section */}
                                         {userBioSummary && (
                                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                                                <div className="bg-slate-50 px-8 py-4 border-b border-slate-200 flex items-center justify-between">
-                                                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
-                                                        <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                                        </svg>
-                                                        Capability Analysis
-                                                    </h3>
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-white text-slate-600 border border-slate-200 shadow-sm">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                                                        AI Generated
-                                                    </span>
-                                                </div>
-                                                <div className="p-8">
-                                                    <div className="prose prose-sm max-w-none text-slate-600 leading-relaxed">
-                                                        {userBioSummary.split('\n').map((line, i) => {
-                                                            // Remove markdown bold markers
-                                                            const cleanLine = line.replace(/\*\*/g, '').trim();
-                                                            if (!cleanLine) return null;
-
-                                                            // Check if it's a list item (starts with * or • or -)
-                                                            const isListItem = cleanLine.startsWith('*') || cleanLine.startsWith('•') || cleanLine.startsWith('-');
-
-                                                            // Remove the bullet marker for display
-                                                            const displayLine = cleanLine.replace(/^[\*•-]\s*/, '');
-
-                                                            // Check if it's a header (ends with :)
-                                                            const isHeader = displayLine.endsWith(':');
-
-                                                            if (isHeader) {
-                                                                return <h4 key={i} className="font-bold text-slate-900 mt-4 first:mt-0 mb-2">{displayLine}</h4>;
-                                                            }
-
-                                                            if (isListItem) {
-                                                                return (
-                                                                    <div key={i} className="flex items-start gap-2.5 mb-2 pl-1">
-                                                                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 shrink-0"></span>
-                                                                        <span className="text-slate-700">{displayLine}</span>
-                                                                    </div>
-                                                                );
-                                                            }
-
-                                                            return <p key={i} className="mb-2">{displayLine}</p>;
-                                                        })}
+                                                {userBioSummary === "Your skill profile is complete. You are ready to explore the simulation." ? (
+                                                    // Static Confirmation View
+                                                    <div className="bg-emerald-50 px-8 py-6 border-l-4 border-emerald-500">
+                                                        <div className="flex items-center justify-between gap-4">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                                                    <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <h3 className="text-lg font-bold text-slate-800">Profile Complete</h3>
+                                                                    <p className="text-slate-600 mt-1">
+                                                                        Your skill profile is complete. You are ready to explore the simulation.
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <Link
+                                                                href="/projects"
+                                                                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-sm shadow-emerald-200 transition-all flex items-center gap-2 shrink-0"
+                                                            >
+                                                                Browse Projects
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                                </svg>
+                                                            </Link>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                ) : (
+                                                    // Legacy / AI View
+                                                    <>
+                                                        <div className="bg-slate-50 px-8 py-4 border-b border-slate-200 flex items-center justify-between">
+                                                            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
+                                                                <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                                                </svg>
+                                                                Capability Analysis
+                                                            </h3>
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-white text-slate-600 border border-slate-200 shadow-sm">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                                                                AI Generated
+                                                            </span>
+                                                        </div>
+                                                        <div className="p-8">
+                                                            <div className="prose prose-sm max-w-none text-slate-600 leading-relaxed">
+                                                                {userBioSummary.split('\n').map((line, i) => {
+                                                                    // Remove markdown bold markers
+                                                                    const cleanLine = line.replace(/\*\*/g, '').trim();
+                                                                    if (!cleanLine) return null;
+
+                                                                    // Check if it's a list item (starts with * or • or -)
+                                                                    const isListItem = cleanLine.startsWith('*') || cleanLine.startsWith('•') || cleanLine.startsWith('-');
+
+                                                                    // Remove the bullet marker for display
+                                                                    const displayLine = cleanLine.replace(/^[\*•-]\s*/, '');
+
+                                                                    // Check if it's a header (ends with :)
+                                                                    const isHeader = displayLine.endsWith(':');
+
+                                                                    if (isHeader) {
+                                                                        return <h4 key={i} className="font-bold text-slate-900 mt-4 first:mt-0 mb-2">{displayLine}</h4>;
+                                                                    }
+
+                                                                    if (isListItem) {
+                                                                        return (
+                                                                            <div key={i} className="flex items-start gap-2.5 mb-2 pl-1">
+                                                                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 shrink-0"></span>
+                                                                                <span className="text-slate-700">{displayLine}</span>
+                                                                            </div>
+                                                                        );
+                                                                    }
+
+                                                                    return <p key={i} className="mb-2">{displayLine}</p>;
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -413,11 +446,10 @@ const SkillProfile = ({ auth, skills, userSkills, userBio, userBioSummary }) => 
                                                 <button
                                                     key={category}
                                                     onClick={() => setActiveCategory(category)}
-                                                    className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                                                        activeCategory === category
+                                                    className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${activeCategory === category
                                                             ? 'bg-slate-900 text-white shadow-md shadow-slate-200'
                                                             : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {category}
                                                 </button>
@@ -431,11 +463,10 @@ const SkillProfile = ({ auth, skills, userSkills, userBio, userBioSummary }) => 
                                                     key={skill.id}
                                                     onClick={() => handleAddSkill(skill.id)}
                                                     disabled={selectedSkills.includes(skill.id)}
-                                                    className={`flex items-center justify-between p-3.5 rounded-xl border text-left transition-all duration-200 ${
-                                                        selectedSkills.includes(skill.id)
+                                                    className={`flex items-center justify-between p-3.5 rounded-xl border text-left transition-all duration-200 ${selectedSkills.includes(skill.id)
                                                             ? 'bg-slate-50 border-slate-100 opacity-50 cursor-default'
                                                             : 'bg-white border-slate-200 hover:border-indigo-500 hover:shadow-md hover:shadow-indigo-500/5 group'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <span className={`text-sm font-medium ${selectedSkills.includes(skill.id) ? 'text-slate-400' : 'text-slate-700 group-hover:text-slate-900'}`}>
                                                         {skill.name}

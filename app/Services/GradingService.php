@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 class GradingService
 {
     protected $allowedExtensions = ['php', 'js', 'jsx', 'ts', 'tsx', 'css', 'html', 'sql', 'json', 'md'];
-    protected $ignoredDirectories = ['node_modules', 'vendor', '.git', 'storage', 'dist', 'build'];
+    protected $ignoredDirectories = ['node_modules', 'vendor', '.git', 'storage', 'dist', 'build', 'public', 'tests', 'lang'];
 
     public function grade(Submission $submission)
     {
@@ -30,78 +30,88 @@ class GradingService
             // 3. Read and Aggregate Code
             $codeContent = $this->readProjectFiles($extractPath);
 
-            if (empty($codeContent)) {
-                throw new \Exception("No valid source code files found in the submission.");
-            }
-
             // 4. Prepare AI Prompt
             $task = $submission->userTask->task;
             $prompt = $this->constructPrompt($task, $codeContent);
 
-            // 5. Call AI (DISABLED FOR DEVELOPMENT)
-            /*
-            $apiKey = env('GEMINI_API_KEY');
+            // 5. Call AI (Groq API - Llama 3.3 70B)
+            $apiKey = env('GROQ_API_KEY');
             if (!$apiKey) {
-                throw new \Exception("GEMINI_API_KEY is not configured.");
-            }
-
-            // Using gemini-pro for maximum compatibility and stability
-            $response = Http::retry(3, 2000)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}", [
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt]
-                        ]
-                    ]
-                ]
-            ]);
-
-            if ($response->failed()) {
-                Log::error("Gemini API Error: " . $response->body());
-                throw new \Exception("AI Grading failed: " . $response->status());
-            }
-
-            $responseData = $response->json();
-            $aiText = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? '';
-
-            // Extract JSON using regex to handle potential markdown or preamble
-            if (preg_match('/\{[\s\S]*\}/', $aiText, $matches)) {
-                $jsonString = $matches[0];
+                Log::warning("GROQ_API_KEY missing. Falling back to Mock.");
+                $score = 85;
+                $feedback = "SimuLearn Grading (Mock Mode):\nScore: 85/100\n\nNote: Configure GROQ_API_KEY for real AI grading.";
             } else {
-                $jsonString = $aiText;
+
+                Log::info("GradingService: Sending payload to Groq (Llama 3.3). Length: " . strlen($prompt) . " chars.");
+
+                // Using Groq's OpenAI-compatible endpoint
+                $response = Http::retry(3, 2000)
+                    ->withHeaders([
+                        'Content-Type' => 'application/json',
+                        'Authorization' => 'Bearer ' . $apiKey
+                    ])
+                    ->post("https://api.groq.com/openai/v1/chat/completions", [
+                        'model' => 'llama-3.3-70b-versatile',
+                        'messages' => [
+                            [
+                                'role' => 'system',
+                                'content' => "You are an expert Senior Technical Lead. You are strictly grading a coding submission.\n" .
+                                    "You MUST return the result in valid JSON format only."
+                            ],
+                            [
+                                'role' => 'user',
+                                'content' => $prompt
+                            ]
+                        ],
+                        'temperature' => 0.1, // Low temp for consistency
+                        'response_format' => ['type' => 'json_object'] // Force JSON mode
+                    ]);
+
+                if ($response->failed()) {
+                    Log::error("Groq API Error: " . $response->body());
+                    if ($response->status() === 429) {
+                        // Graceful Fallback for Groq Limit
+                        $score = 80;
+                        $feedback = "# Grading Report (Fallback)\n\n";
+                        $feedback .= "**System Warning**: The Groq AI Service is currently rate-limited (429).\n";
+                        $feedback .= "Showing a simulated passing grade.\n";
+                    } else {
+                        throw new \Exception("AI Grading failed: " . $response->status());
+                    }
+                } else {
+                    $responseData = $response->json();
+                    $aiText = $responseData['choices'][0]['message']['content'] ?? '';
+
+                    // Parse the structured JSON
+                    $result = json_decode($aiText, true);
+
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        Log::error("AI Grading JSON Parse Error. Raw: " . $aiText);
+                        $score = 70;
+                        $feedback = "Error parsing AI response. Raw output:\n" . $aiText;
+                    } else {
+                        $score = $result['score'] ?? 0;
+                        $feedback = "# Grading Report\n\n";
+                        $feedback .= "**Summary**: " . ($result['summary'] ?? 'No summary provided.') . "\n\n";
+                        $feedback .= "## 🐛 Bugs Detected\n";
+                        if (!empty($result['bugs'])) {
+                            foreach ($result['bugs'] as $bug) {
+                                $feedback .= "- " . $bug . "\n";
+                            }
+                        } else {
+                            $feedback .= "No critical bugs found.\n";
+                        }
+                        $feedback .= "\n## 🛠 Suggested Fixes\n";
+                        if (!empty($result['fixes'])) {
+                            foreach ($result['fixes'] as $fix) {
+                                $feedback .= "- " . $fix . "\n";
+                            }
+                        } else {
+                            $feedback .= "No specific fixes suggested.\n";
+                        }
+                    }
+                }
             }
-
-            $result = json_decode($jsonString, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                // Fallback if JSON parsing fails
-                Log::warning("AI Grading JSON Parse Error. Raw output: " . $aiText);
-                $score = 70; // Default fallback
-                $feedback = $aiText; // Use the raw text as feedback if it's not JSON
-            } else {
-                $score = $result['score'] ?? 0;
-                $feedback = $result['feedback'] ?? "No feedback provided.";
-            }
-            */
-
-            // MOCK RESULT
-            $score = 85;
-            $taskTitle = $task->title ?? 'Project Task';
-            $feedback = "Grading Report: {$taskTitle}\n" .
-                "Score: 85/100\n\n" .
-                "Summary\n" .
-                "The submission demonstrates a solid understanding of the core concepts required for '{$taskTitle}'. The code is generally well-structured and follows common conventions. A few improvements are recommended, especially around error handling and documentation.\n\n" .
-                "Detailed Feedback\n\n" .
-                "Strengths\n" .
-                "- Code Organization: The project structure is logical and easy to navigate.\n" .
-                "- Core Functionality: The main requirements appear to be addressed.\n" .
-                "- Syntax/Build Health: No obvious syntax issues were detected during inspection.\n\n" .
-                "Areas for Improvement\n" .
-                "- Error Handling: Add clearer error states and defensive checks around risky operations (API calls, file IO, DB operations).\n" .
-                "- Maintainability: Add short comments or DocBlocks for non-trivial functions and business rules.\n" .
-                "- Input Validation: Validate and sanitize all inputs early (type checks, required fields, bounds/format).\n\n" .
-                "Recommendation\n" .
-                "Prioritize improving error handling first, then add minimal documentation for key functions. Overall, a strong start.";
 
             // 6. Update Submission
             $submission->update([
@@ -116,7 +126,6 @@ class GradingService
             ];
 
         } finally {
-            // 7. Cleanup
             File::deleteDirectory($extractPath);
         }
     }
@@ -138,30 +147,49 @@ class GradingService
         $files = File::allFiles($directory);
         $debugLog = [];
 
+        $totalLength = 0;
+        $maxLength = 32000;
+
         foreach ($files as $file) {
+            if ($totalLength >= $maxLength) {
+                $content .= "\n\n[SYSTEM WARNING]: Remaining files truncated due to API context limits.";
+                break;
+            }
+
             $relativePath = str_replace($directory, '', $file->getPathname());
 
-            // Skip ignored directories
             foreach ($this->ignoredDirectories as $ignored) {
-                // Check against relative path to avoid matching the system storage path
-                if (str_contains($relativePath, DIRECTORY_SEPARATOR . $ignored . DIRECTORY_SEPARATOR) ||
-                    str_starts_with(ltrim($relativePath, DIRECTORY_SEPARATOR), $ignored . DIRECTORY_SEPARATOR)) {
+                if (
+                    str_contains($relativePath, DIRECTORY_SEPARATOR . $ignored . DIRECTORY_SEPARATOR) ||
+                    str_starts_with(ltrim($relativePath, DIRECTORY_SEPARATOR), $ignored . DIRECTORY_SEPARATOR)
+                ) {
                     $debugLog[] = "Skipped (Ignored Dir): $relativePath";
                     continue 2;
                 }
             }
 
-            // Check extension
             if (in_array($file->getExtension(), $this->allowedExtensions)) {
                 $fileContent = file_get_contents($file->getPathname());
+                $perFileLimit = 4000;
 
-                // Limit file size to avoid token overflow (e.g., 10KB per file)
-                if (strlen($fileContent) > 10000) {
-                    $fileContent = substr($fileContent, 0, 10000) . "\n...[Truncated]...";
+                if (strlen($fileContent) > $perFileLimit) {
+                    $fileContent = substr($fileContent, 0, $perFileLimit) . "\n...[File Truncated]...";
                 }
 
-                $content .= "\n\n--- FILE: " . $relativePath . " ---\n";
-                $content .= $fileContent;
+                $fileEntry = "\n\n--- FILE: " . $relativePath . " ---\n" . $fileContent;
+
+                if (($totalLength + strlen($fileEntry)) > $maxLength) {
+                    $remainingBudget = $maxLength - $totalLength;
+                    if ($remainingBudget > 100) {
+                        $content .= substr($fileEntry, 0, $remainingBudget) . "\n...[Global Truncation]...";
+                        $totalLength += $remainingBudget;
+                    }
+                    $content .= "\n\n[SYSTEM WARNING]: Context limit reached.";
+                    break;
+                }
+
+                $content .= $fileEntry;
+                $totalLength += strlen($fileEntry);
                 $debugLog[] = "Included: $relativePath";
             } else {
                 $debugLog[] = "Skipped (Extension " . $file->getExtension() . "): $relativePath";
@@ -169,7 +197,6 @@ class GradingService
         }
 
         if (empty($content)) {
-            // If no content found, throw exception with debug info
             $debugString = implode("\n", $debugLog);
             throw new \Exception("No valid source code files found in the submission.\nScanned Files:\n" . $debugString);
         }
@@ -179,21 +206,30 @@ class GradingService
 
     protected function constructPrompt($task, $codeContent)
     {
-        return "You are a Senior Technical Lead reviewing a junior developer's code.\n\n" .
-               "TASK TITLE: " . $task->title . "\n" .
-               "SCENARIO: " . $task->scenario . "\n" .
-               "EXPECTED OUTCOME: " . $task->expected_outcome . "\n\n" .
-               "SCORING RUBRIC:\n" .
-               "- 90-100 (Excellent): Meets all requirements, follows best practices, clean code, no errors.\n" .
-               "- 75-89 (Good): Functional, meets core requirements, but has minor code quality issues or inefficiencies.\n" .
-               "- 60-74 (Satisfactory): Functional but misses some edge cases or has poor structure/formatting.\n" .
-               "- < 60 (Needs Improvement): Does not meet the core expected outcome or has critical bugs.\n\n" .
-               "Please review the following code submission and provide:\n" .
-               "1. A score from 0-100 based on the rubric.\n" .
-               "2. Constructive feedback on correctness, code quality, and best practices.\n\n" .
-               "IMPORTANT: Return ONLY a valid JSON object with the following structure:\n" .
-               "{ \"score\": number, \"feedback\": \"string\" }\n\n" .
-               "SUBMITTED CODE:\n" .
-               $codeContent;
+        return "TASK TITLE: " . $task->title . "\n" .
+            "SCENARIO: " . $task->scenario . "\n" .
+            "EXPECTED OUTCOME: " . $task->expected_outcome . "\n\n" .
+            "ROLE: You are a Lead Code Reviewer known for being strict, precise, and anti-fluff. You hate generic feedback.\n\n" .
+            "STRICT REVIEW RULES (FOLLOW THESE OR FAIL):\n" .
+            "1. NO HALLUCINATIONS: Do NOT complain about missing features (like 'missing alt tags') unless an <img> tag actually exists in the code. IF IT IS NOT THERE, DO NOT INVENT IT.\n" .
+            "2. CONTEXT AWARE: If the user is using a CDN (e.g., Tailwind Play CDN) in a simple HTML file, do NOT complain about 'performance' or suggest a build step. Accept the context of a simple simulation.\n" .
+            "3. EVIDENCE REQUIRED: For every bug you list, you must vaguely reference the specific line or section. Do not say 'the code is messy'—say 'The header indentation is inconsistent'.\n" .
+            "4. NO GENERIC PRAISE: Do not say 'good job' or 'well structured' unless it is truly exceptional. Focus on technical correctness.\n" .
+            "5. SYNTAX & LOGIC FIRST: Prioritize broken code, bad variable names, and security risks over minor styling preferences.\n\n" .
+            "SCORING RUBRIC:\n" .
+            "- 90-100: Flawless. No logical errors, perfect conventions.\n" .
+            "- 75-89: Good. Works, but has minor bad practices (e.g., magic numbers, poor naming).\n" .
+            "- 50-74: Weak. Works but is fragile, messy, or violates the core task instructions.\n" .
+            "- < 50: Fail. Does not run or misses the main objective completely.\n\n" .
+            "OUTPUT FORMAT:\n" .
+            "Return ONLY a raw JSON object (no markdown formatting) with this exact schema:\n" .
+            "{\n" .
+            "  \"score\": number (0-100),\n" .
+            "  \"summary\": \"Direct assessment of the submission quality.\",\n" .
+            "  \"bugs\": [ \"[Critical] List specific issue\", \"[Minor] List specific issue\" ],\n" .
+            "  \"fixes\": [ \"Specific code change to fix the corresponding bug\" ]\n" .
+            "}\n\n" .
+            "SUBMITTED CODE:\n" .
+            $codeContent;
     }
 }
